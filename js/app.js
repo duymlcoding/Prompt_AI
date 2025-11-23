@@ -4,7 +4,7 @@ class PromptGenerator {
     constructor() {
         this.currentStep = 0; // 0 = welcome screen
         this.totalSteps = promptSteps.length;
-        this.selections = {};
+        this.selections = {}; // Format: { stepId: { sectionId: value or [values] } }
         this.init();
     }
 
@@ -75,29 +75,23 @@ class PromptGenerator {
         const step = promptSteps[this.currentStep - 1];
         const mainContent = document.getElementById('mainContent');
 
+        // Initialize selections for this step if not exists
+        if (!this.selections[step.id]) {
+            this.selections[step.id] = {};
+        }
+
         let html = `
             <div class="step-content">
                 <h2>Step ${step.id}: ${step.title}</h2>
                 <p class="step-description">${step.description}</p>
-                <div class="options-grid">
         `;
 
-        step.options.forEach(option => {
-            const isSelected = this.selections[step.id] === option.value;
-            html += `
-                <div class="option-card ${isSelected ? 'selected' : ''}"
-                     data-step="${step.id}"
-                     data-value="${option.value}">
-                    <h3>${option.label}</h3>
-                    <p>${option.description}</p>
-                </div>
-            `;
+        // Render each section within the step
+        step.sections.forEach(section => {
+            html += this.renderSection(step.id, section);
         });
 
-        html += `
-                </div>
-            </div>
-        `;
+        html += `</div>`;
 
         mainContent.innerHTML = html;
         this.attachOptionListeners();
@@ -107,23 +101,155 @@ class PromptGenerator {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    renderSection(stepId, section) {
+        let html = `
+            <div class="section-container" data-section="${section.id}">
+                <div class="section-header">
+                    <h3>${section.title}</h3>
+                    ${section.required ? '<span class="required-badge">Required</span>' : ''}
+                </div>
+        `;
+
+        if (section.type === 'fixed') {
+            // Fixed sections - display as informational, always applied
+            html += this.renderFixedSection(section);
+        } else if (section.type === 'multi') {
+            // Multi-select - checkboxes
+            html += this.renderMultiSelect(stepId, section);
+        } else {
+            // Single-select - radio buttons (styled as cards)
+            html += this.renderSingleSelect(stepId, section);
+        }
+
+        html += `</div>`;
+        return html;
+    }
+
+    renderFixedSection(section) {
+        let html = `
+            <div class="fixed-section">
+                <p class="fixed-section-notice">✓ These requirements are always applied</p>
+        `;
+
+        if (section.rules) {
+            html += `<ul class="fixed-rules-list">`;
+            section.rules.forEach(rule => {
+                html += `<li>${rule}</li>`;
+            });
+            html += `</ul>`;
+        }
+
+        if (section.bannedPhrases) {
+            html += `
+                <div class="banned-words-container">
+                    <p class="banned-words-title">Banned AI-Common Phrases (${section.bannedPhrases.length} phrases):</p>
+                    <div class="banned-words-grid">
+                        ${section.bannedPhrases.slice(0, 30).map(phrase =>
+                            `<span class="banned-word">${phrase}</span>`
+                        ).join('')}
+                        ${section.bannedPhrases.length > 30 ?
+                            `<span class="banned-word-more">+${section.bannedPhrases.length - 30} more...</span>`
+                            : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+        return html;
+    }
+
+    renderMultiSelect(stepId, section) {
+        const selectedValues = this.selections[stepId]?.[section.id] || [];
+
+        let html = `<div class="options-grid multi-select">`;
+
+        section.options.forEach(option => {
+            const isSelected = selectedValues.includes(option.value);
+            html += `
+                <div class="option-card checkbox-card ${isSelected ? 'selected' : ''}"
+                     data-step="${stepId}"
+                     data-section="${section.id}"
+                     data-value="${option.value}"
+                     data-type="multi">
+                    <div class="checkbox-indicator">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 10L8 13L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="option-content">
+                        <h4>${option.label}</h4>
+                        <p>${option.description}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
+    renderSingleSelect(stepId, section) {
+        const selectedValue = this.selections[stepId]?.[section.id];
+
+        let html = `<div class="options-grid single-select">`;
+
+        section.options.forEach(option => {
+            const isSelected = selectedValue === option.value;
+            html += `
+                <div class="option-card ${isSelected ? 'selected' : ''}"
+                     data-step="${stepId}"
+                     data-section="${section.id}"
+                     data-value="${option.value}"
+                     data-type="single">
+                    <h4>${option.label}</h4>
+                    <p>${option.description}</p>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
     attachOptionListeners() {
         const cards = document.querySelectorAll('.option-card');
         cards.forEach(card => {
             card.addEventListener('click', () => {
-                const step = parseInt(card.dataset.step);
+                const stepId = parseInt(card.dataset.step);
+                const sectionId = card.dataset.section;
                 const value = card.dataset.value;
+                const type = card.dataset.type;
 
-                // Remove selection from siblings
-                document.querySelectorAll(`[data-step="${step}"]`).forEach(c => {
-                    c.classList.remove('selected');
-                });
+                if (type === 'multi') {
+                    // Multi-select: toggle selection
+                    if (!this.selections[stepId][sectionId]) {
+                        this.selections[stepId][sectionId] = [];
+                    }
 
-                // Mark this as selected
-                card.classList.add('selected');
+                    const index = this.selections[stepId][sectionId].indexOf(value);
+                    if (index > -1) {
+                        // Deselect
+                        this.selections[stepId][sectionId].splice(index, 1);
+                        card.classList.remove('selected');
+                    } else {
+                        // Select
+                        this.selections[stepId][sectionId].push(value);
+                        card.classList.add('selected');
+                    }
+                } else {
+                    // Single-select: replace selection
+                    // Remove selection from siblings
+                    document.querySelectorAll(`[data-step="${stepId}"][data-section="${sectionId}"]`).forEach(c => {
+                        c.classList.remove('selected');
+                    });
 
-                // Store selection
-                this.selections[step] = value;
+                    // Mark this as selected
+                    card.classList.add('selected');
+
+                    // Store selection
+                    this.selections[stepId][sectionId] = value;
+                }
 
                 // Update UI
                 this.updateHeaderStats();
@@ -182,23 +308,57 @@ class PromptGenerator {
             generateBtn.style.display = 'none';
         }
 
-        // Enable/disable next button based on selection
-        const hasSelection = this.selections[this.currentStep] !== undefined;
-        nextBtn.disabled = !hasSelection;
-        generateBtn.disabled = !hasSelection;
+        // Enable/disable buttons based on whether all required sections are filled
+        const currentStepConfig = promptSteps[this.currentStep - 1];
+        const hasAllRequiredSelections = this.validateStep(currentStepConfig);
+
+        nextBtn.disabled = !hasAllRequiredSelections;
+        generateBtn.disabled = !hasAllRequiredSelections;
+    }
+
+    validateStep(stepConfig) {
+        const stepSelections = this.selections[stepConfig.id] || {};
+
+        // Check all required sections
+        for (const section of stepConfig.sections) {
+            if (section.required) {
+                const value = stepSelections[section.id];
+
+                // For single-select, must have a value
+                if (section.type === 'single' && !value) {
+                    return false;
+                }
+
+                // For multi-select, must have at least one selection
+                if (section.type === 'multi' && (!value || value.length === 0)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     updateHeaderStats() {
-        const selectionCount = Object.keys(this.selections).length;
+        // Count completed steps (all required sections filled)
+        let completedSteps = 0;
+        for (let i = 0; i < this.totalSteps; i++) {
+            const step = promptSteps[i];
+            if (this.validateStep(step)) {
+                completedSteps++;
+            }
+        }
+
         document.getElementById('stepCount').textContent = this.currentStep;
-        document.getElementById('selectionCount').textContent = `${selectionCount}/${this.totalSteps}`;
+        document.getElementById('selectionCount').textContent = `${completedSteps}/${this.totalSteps}`;
     }
 
     generatePrompt() {
-        // Ensure all steps have selections
-        const selectionCount = Object.keys(this.selections).length;
-        if (selectionCount < this.totalSteps) {
-            alert('Please complete all steps before generating your prompt.');
+        // Ensure all steps are completed
+        const allCompleted = promptSteps.every(step => this.validateStep(step));
+
+        if (!allCompleted) {
+            alert('Please complete all required selections before generating your prompt.');
             return;
         }
 
@@ -319,7 +479,7 @@ class PromptGenerator {
             <div class="welcome-screen">
                 <div class="welcome-icon">📝</div>
                 <h2>Welcome to Academic Prompt Generator</h2>
-                <p>Create customized, humanized writing prompts for academic work in just 9 simple steps.</p>
+                <p>Create customized, humanized writing prompts for academic work in just 5 simple steps.</p>
                 <button class="btn btn-primary btn-large" id="startBtn">
                     Start Building Your Prompt
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -335,7 +495,7 @@ class PromptGenerator {
                     <div class="feature-card">
                         <div class="feature-icon">✍️</div>
                         <h3>Humanized Writing</h3>
-                        <p>15+ options for natural, authentic academic voice</p>
+                        <p>17+ humanization features for natural voice</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">📚</div>
@@ -495,72 +655,7 @@ class PromptGenerator {
     }
 
     renderPresets() {
-        const presets = [
-            {
-                name: 'Graduate Thesis',
-                icon: '🎓',
-                description: 'Formal academic writing for dissertations',
-                config: {
-                    1: 'lit_review_thematic',
-                    2: 'phd_candidate',
-                    3: 'high_natural',
-                    4: 'apa_standard',
-                    5: 'thesis_driven',
-                    6: 'high_dissertation',
-                    7: 'formal_standard',
-                    8: 'standard_sections',
-                    9: 'research_gaps'
-                }
-            },
-            {
-                name: 'ESL Student Essay',
-                icon: '✍️',
-                description: 'Natural, humanized academic writing',
-                config: {
-                    1: 'argumentative',
-                    2: 'international_grad',
-                    3: 'max_esl',
-                    4: 'apa_standard',
-                    5: 'progressive',
-                    6: 'strong_graduate',
-                    7: 'esl_formal',
-                    8: 'standard_sections',
-                    9: 'none'
-                }
-            },
-            {
-                name: 'Reflection Paper',
-                icon: '🔍',
-                description: 'Personal academic reflection',
-                config: {
-                    1: 'reflection',
-                    2: 'reflective_practitioner',
-                    3: 'personal_voice',
-                    4: 'apa_standard',
-                    5: 'question_driven',
-                    6: 'moderate_undergrad',
-                    7: 'readable_academic',
-                    8: 'reflective_5r',
-                    9: 'none'
-                }
-            },
-            {
-                name: 'Research Proposal',
-                icon: '📊',
-                description: 'Rigorous research planning document',
-                config: {
-                    1: 'research_proposal',
-                    2: 'research_scholar',
-                    3: 'subtle_polished',
-                    4: 'apa_heavy',
-                    5: 'problem_solution',
-                    6: 'maximum_research',
-                    7: 'formal_standard',
-                    8: 'standard_sections',
-                    9: 'methodological_focus'
-                }
-            }
-        ];
+        const presets = this.getPresets();
 
         return `
             <div class="preset-grid">
@@ -573,6 +668,123 @@ class PromptGenerator {
                 `).join('')}
             </div>
         `;
+    }
+
+    getPresets() {
+        return [
+            {
+                name: 'Graduate Thesis',
+                icon: '🎓',
+                description: 'Formal academic writing for dissertations',
+                config: {
+                    1: {
+                        writing_type: 'lit_review_thematic',
+                        writer_role: 'phd_researcher'
+                    },
+                    2: {
+                        input_type: 'outline_provided',
+                        source_usage: ['provided_sources', 'verify_accuracy'],
+                        evidence_claims: ['substantiate_claims', 'explain_relevance']
+                    },
+                    3: {
+                        citation_format: 'apa_7th',
+                        quotation_balance: 'balanced',
+                        quality_depth: ['comprehensive_evidence', 'critical_evaluation', 'counterarguments']
+                    },
+                    4: {
+                        humanization_features: ['rhythm_variation', 'subtle_imperfections']
+                    },
+                    5: {
+                        organization: 'standard_academic',
+                        additional_features: ['research_gaps', 'methodological_focus']
+                    }
+                }
+            },
+            {
+                name: 'ESL Student Essay',
+                icon: '✍️',
+                description: 'Natural, humanized academic writing',
+                config: {
+                    1: {
+                        writing_type: 'argumentative',
+                        writer_role: 'esl_student'
+                    },
+                    2: {
+                        input_type: 'topic_only',
+                        source_usage: ['never_fabricate', 'acknowledge_limits'],
+                        evidence_claims: ['substantiate_claims', 'hedge_appropriately']
+                    },
+                    3: {
+                        citation_format: 'apa_7th',
+                        quotation_balance: 'paraphrase_heavy',
+                        quality_depth: ['comprehensive_evidence']
+                    },
+                    4: {
+                        humanization_features: ['esl_patterns', 'rhythm_variation', 'subtle_imperfections', 'personal_touch']
+                    },
+                    5: {
+                        organization: 'standard_academic',
+                        additional_features: []
+                    }
+                }
+            },
+            {
+                name: 'Reflection Paper',
+                icon: '🔍',
+                description: 'Personal academic reflection',
+                config: {
+                    1: {
+                        writing_type: 'reflection',
+                        writer_role: 'reflective_practitioner'
+                    },
+                    2: {
+                        input_type: 'topic_only',
+                        source_usage: ['acknowledge_limits'],
+                        evidence_claims: ['hedge_appropriately']
+                    },
+                    3: {
+                        citation_format: 'apa_7th',
+                        quotation_balance: 'minimal_quotes',
+                        quality_depth: ['comprehensive_evidence']
+                    },
+                    4: {
+                        humanization_features: ['personal_touch', 'rhythm_variation', 'authentic_voice']
+                    },
+                    5: {
+                        organization: 'reflective_5r',
+                        additional_features: []
+                    }
+                }
+            },
+            {
+                name: 'Research Proposal',
+                icon: '📊',
+                description: 'Rigorous research planning document',
+                config: {
+                    1: {
+                        writing_type: 'research_proposal',
+                        writer_role: 'phd_researcher'
+                    },
+                    2: {
+                        input_type: 'outline_provided',
+                        source_usage: ['provided_sources', 'verify_accuracy'],
+                        evidence_claims: ['substantiate_claims', 'explain_relevance', 'address_alternatives']
+                    },
+                    3: {
+                        citation_format: 'apa_7th',
+                        quotation_balance: 'quote_heavy',
+                        quality_depth: ['comprehensive_evidence', 'critical_evaluation', 'counterarguments', 'methodological_awareness', 'research_gaps']
+                    },
+                    4: {
+                        humanization_features: ['rhythm_variation', 'subtle_imperfections']
+                    },
+                    5: {
+                        organization: 'problem_solution',
+                        additional_features: ['methodological_focus', 'research_gaps']
+                    }
+                }
+            }
+        ];
     }
 
     attachModalListeners() {
@@ -658,7 +870,7 @@ class PromptGenerator {
 
     loadConfig(index) {
         const config = this.savedConfigs[index];
-        this.selections = { ...config.selections };
+        this.selections = JSON.parse(JSON.stringify(config.selections)); // Deep copy
         this.closeModal();
 
         // Navigate to first step if not there already
@@ -683,67 +895,9 @@ class PromptGenerator {
     }
 
     loadPreset(index) {
-        const presets = [
-            {
-                name: 'Graduate Thesis',
-                config: {
-                    1: 'lit_review_thematic',
-                    2: 'phd_candidate',
-                    3: 'high_natural',
-                    4: 'apa_standard',
-                    5: 'thesis_driven',
-                    6: 'high_dissertation',
-                    7: 'formal_standard',
-                    8: 'standard_sections',
-                    9: 'research_gaps'
-                }
-            },
-            {
-                name: 'ESL Student Essay',
-                config: {
-                    1: 'argumentative',
-                    2: 'international_grad',
-                    3: 'max_esl',
-                    4: 'apa_standard',
-                    5: 'progressive',
-                    6: 'strong_graduate',
-                    7: 'esl_formal',
-                    8: 'standard_sections',
-                    9: 'none'
-                }
-            },
-            {
-                name: 'Reflection Paper',
-                config: {
-                    1: 'reflection',
-                    2: 'reflective_practitioner',
-                    3: 'personal_voice',
-                    4: 'apa_standard',
-                    5: 'question_driven',
-                    6: 'moderate_undergrad',
-                    7: 'readable_academic',
-                    8: 'reflective_5r',
-                    9: 'none'
-                }
-            },
-            {
-                name: 'Research Proposal',
-                config: {
-                    1: 'research_proposal',
-                    2: 'research_scholar',
-                    3: 'subtle_polished',
-                    4: 'apa_heavy',
-                    5: 'problem_solution',
-                    6: 'maximum_research',
-                    7: 'formal_standard',
-                    8: 'standard_sections',
-                    9: 'methodological_focus'
-                }
-            }
-        ];
-
+        const presets = this.getPresets();
         const preset = presets[index];
-        this.selections = { ...preset.config };
+        this.selections = JSON.parse(JSON.stringify(preset.config)); // Deep copy
         this.closeModal();
 
         // Navigate to first step
@@ -763,7 +917,7 @@ class PromptGenerator {
             name: "Exported Configuration",
             selections: this.selections,
             timestamp: new Date().toISOString(),
-            version: "1.0"
+            version: "2.0"
         };
 
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -793,7 +947,7 @@ class PromptGenerator {
                     throw new Error('Invalid configuration file');
                 }
 
-                this.selections = { ...config.selections };
+                this.selections = JSON.parse(JSON.stringify(config.selections)); // Deep copy
                 this.closeModal();
 
                 if (this.currentStep === 0) {

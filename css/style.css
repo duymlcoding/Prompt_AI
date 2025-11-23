@@ -1028,3 +1028,210 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* ===== SECTION-BASED UI ===== */
+.section-container {
+    margin-bottom: 48px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.required-badge {
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== MULTI-SELECT CHECKBOX CARDS ===== */
+.checkbox-card {
+    position: relative;
+    padding-left: 60px !important;
+}
+
+.checkbox-indicator {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    background: var(--bg-white);
+}
+
+.checkbox-indicator svg {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: var(--transition);
+}
+
+.checkbox-card.selected .checkbox-indicator {
+    background: var(--primary-gradient);
+    border-color: var(--primary-color);
+}
+
+.checkbox-card.selected .checkbox-indicator svg {
+    opacity: 1;
+    transform: scale(1);
+    stroke: white;
+}
+
+.option-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.option-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ===== FIXED SECTIONS ===== */
+.fixed-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: var(--radius-md);
+    padding: 24px;
+}
+
+body.dark-mode .fixed-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.fixed-section-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+}
+
+.fixed-rules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fixed-rules-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.fixed-rules-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* ===== BANNED WORDS SECTION ===== */
+.banned-words-container {
+    margin-top: 20px;
+}
+
+.banned-words-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.banned-words-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.banned-word {
+    display: inline-block;
+    background: rgba(245, 87, 108, 0.1);
+    color: #f5576c;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(245, 87, 108, 0.2);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+body.dark-mode .banned-word {
+    background: rgba(245, 87, 108, 0.15);
+    border-color: rgba(245, 87, 108, 0.3);
+}
+
+.banned-word-more {
+    display: inline-block;
+    background: var(--bg-light);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+/* ===== RESPONSIVE UPDATES ===== */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .checkbox-card {
+        padding-left: 52px !important;
+    }
+
+    .checkbox-indicator {
+        left: 16px;
+        width: 20px;
+        height: 20px;
+    }
+
+    .fixed-section {
+        padding: 16px;
+    }
+
+    .banned-words-grid {
+        gap: 6px;
+    }
+
+    .banned-word {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+}
