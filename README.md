@@ -1,6 +1,6 @@
 # Academic Prompt Generator
 
-A beautiful, interactive web application for creating customized AI writing prompts for academic work. Generate humanized, professionally-structured prompts in just 9 simple steps.
+A beautiful, interactive web application for creating customized AI writing prompts for academic work. Generate humanized, professionally-structured prompts in just 5 comprehensive steps.
 
 ## ✨ Features
 
@@ -26,19 +26,15 @@ Visit: [https://duymlcoding.github.io/Prompt_AI/](https://duymlcoding.github.io/
 
 ## 🛠️ How It Works
 
-### 9-Step Configuration Process
+### 5-Step Comprehensive Configuration
 
-1. **Writing Purpose** - Select your document type (reflection, methodology, results, etc.)
-2. **Role & Voice** - Choose the academic persona (professor, PhD candidate, ESL student, etc.)
-3. **Human Writing Markers** - Control humanization level and style
-4. **Citation Style & Density** - Pick format and citation frequency
-5. **Content Development Strategy** - Define how ideas should unfold
-6. **Academic Rigor Level** - Set depth of scholarly engagement
-7. **Writing Style Controls** - Fine-tune grammar, syntax, and structure
-8. **Structure & Headings** - Organize document layout
-9. **Special Requirements** - Add optional features (tables, figures, ethical focus, etc.)
+1. **Writing Purpose & Role** - Select your document type (reflection, methodology, results, etc.) and choose your academic persona (PhD researcher, master's student, international graduate, etc.)
+2. **Input & Source Settings** - Configure what information you'll provide (outline, topic only, partial notes, or full draft) and how sources should be handled
+3. **Academic Rigor & Citation** - Set citation format (APA, Harvard, Chicago, MLA), quotation approach, and quality standards for evidence and scholarly engagement
+4. **Writing Style & Humanization** - Control language patterns, sentence structure, and human-like qualities including ESL patterns, rhythm variation, and natural imperfections
+5. **Structure & Special Features** - Organize document layout (thematic, question-based, problem-solution, etc.) and add optional elements (tables, figures, ethical considerations, etc.)
 
-Each step offers 9-17 detailed options, giving you complete control over your prompt.
+Each step contains multiple detailed sections with carefully crafted options, giving you comprehensive control over your prompt.
 
 ## 📦 Installation
 
@@ -79,7 +75,7 @@ Prompt_AI/
 ├── css/
 │   └── style.css          # All styles and responsive design
 ├── js/
-│   ├── stepConfig.js      # 9 steps with detailed options
+│   ├── stepConfig.js      # 5 comprehensive steps with detailed sections
 │   ├── promptTemplates.js # Prompt assembly logic
 │   └── app.js             # Main application logic
 └── README.md              # This file
@@ -210,11 +206,11 @@ Contributions are welcome! Please follow these steps:
 ### Ideas for Contributions
 
 - [ ] Add more writing purpose templates (grant proposals, book chapters, etc.)
-- [ ] Include example generated prompts
-- [ ] Add dark mode toggle
+- [ ] Include example generated prompts gallery
 - [ ] Create prompt history/favorites feature
-- [ ] Add export to JSON for sharing configurations
-- [ ] Implement prompt templates for specific disciplines (STEM, humanities, etc.)
+- [ ] Add more preset templates for specific use cases
+- [ ] Implement discipline-specific configurations (STEM, humanities, social sciences, etc.)
+- [ ] Add guided tour for first-time users
 
 ## 📄 License
 
