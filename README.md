@@ -16,7 +16,7 @@ A beautiful, interactive web application for creating customized AI writing prom
 
 ## 🚀 Live Demo
 
-Visit: [https://yourusername.github.io/Prompt_AI/](https://yourusername.github.io/Prompt_AI/)
+Visit: [https://duymlcoding.github.io/Prompt_AI/](https://duymlcoding.github.io/Prompt_AI/)
 
 ## 🎨 Screenshots
 
@@ -47,13 +47,13 @@ Each step offers 9-17 detailed options, giving you complete control over your pr
 1. Fork this repository
 2. Go to Settings → Pages
 3. Select `main` branch as source
-4. Your site will be live at `https://yourusername.github.io/Prompt_AI/`
+4. Your site will be live at `https://duymlcoding.github.io/Prompt_AI/`
 
 ### Option 2: Run Locally
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/Prompt_AI.git
+git clone https://github.com/duymlcoding/Prompt_AI.git
 cd Prompt_AI
 ```
 
@@ -228,7 +228,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-Project Link: [https://github.com/yourusername/Prompt_AI](https://github.com/yourusername/Prompt_AI)
+Project Link: [https://github.com/duymlcoding/Prompt_AI](https://github.com/duymlcoding/Prompt_AI)
 
 ---
 
