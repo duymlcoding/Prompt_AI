@@ -8,7 +8,10 @@ A beautiful, interactive web application for creating customized AI writing prom
 - **✍️ Humanized Writing**: 17+ humanization options for natural, authentic academic voice
 - **📚 Citation Control**: Support for APA 7th, Harvard, Chicago, MLA, IEEE, Vancouver, and custom formats
 - **⚡ Instant Generation**: Copy-ready prompts generated in seconds
-- **💾 Export Options**: Copy to clipboard or download as .txt file
+- **💾 Save & Load**: Save your configurations and load them later
+- **🎨 Dark Mode**: Beautiful dark theme with one-click toggle
+- **📤 Import/Export**: Share configurations as JSON files
+- **🚀 Quick Start Presets**: 4 pre-configured templates for common use cases
 - **📱 Responsive Design**: Works beautifully on desktop, tablet, and mobile
 
 ## 🚀 Live Demo
@@ -98,6 +101,46 @@ Prompt_AI/
 - Design assignment prompts for students
 - Create rubric-aligned writing templates
 - Develop scaffolded writing exercises
+
+## 🎨 New Features
+
+### Dark Mode
+Toggle between light and dark themes with a single click. Your preference is saved automatically.
+
+### Save & Load Configurations
+- **Save**: Name and save your current configuration for future use
+- **Load**: Quickly restore any saved configuration
+- **Delete**: Remove configurations you no longer need
+- **Auto-save**: All saved configurations persist in your browser's localStorage
+
+### Quick Start Presets
+Get started instantly with 4 pre-configured templates:
+
+1. **Graduate Thesis** 🎓
+   - Formal academic writing for dissertations
+   - High rigor with thematic literature review
+   - APA citation, formal structure
+
+2. **ESL Student Essay** ✍️
+   - Natural, humanized academic writing
+   - Maximum humanization with ESL-friendly style
+   - Progressive elaboration structure
+
+3. **Reflection Paper** 🔍
+   - Personal academic reflection using 5R framework
+   - Personal voice with moderate rigor
+   - Question-driven exploration
+
+4. **Research Proposal** 📊
+   - Rigorous research planning document
+   - Maximum academic rigor with heavy citations
+   - Problem-solution structure with methodological focus
+
+### Import/Export Configurations
+- **Export**: Save your configuration as a JSON file
+- **Import**: Load configurations from JSON files
+- **Share**: Send configurations to colleagues or students
+- **Backup**: Keep configurations safe across devices
 
 ## 🔧 Customization
 

@@ -12,6 +12,8 @@ class PromptGenerator {
         this.attachInitialListeners();
         this.renderStepIndicators();
         this.updateHeaderStats();
+        this.initTheme();
+        this.initSaveLoad();
     }
 
     attachInitialListeners() {
@@ -26,6 +28,8 @@ class PromptGenerator {
         document.getElementById('copyBtn').addEventListener('click', () => this.copyToClipboard());
         document.getElementById('downloadBtn').addEventListener('click', () => this.downloadPrompt());
         document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+        document.getElementById('saveLoadBtn').addEventListener('click', () => this.openSaveLoadModal());
     }
 
     startJourney() {
@@ -371,6 +375,449 @@ class PromptGenerator {
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== THEME MANAGEMENT =====
+    initTheme() {
+        // Load saved theme or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            this.updateThemeIcon(true);
+        }
+    }
+
+    toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        this.updateThemeIcon(isDark);
+    }
+
+    updateThemeIcon(isDark) {
+        const sunIcon = document.querySelector('.sun-icon');
+        const moonIcon = document.querySelector('.moon-icon');
+
+        if (isDark) {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+
+    // ===== SAVE/LOAD CONFIGURATION =====
+    initSaveLoad() {
+        this.savedConfigs = JSON.parse(localStorage.getItem('savedConfigs') || '[]');
+    }
+
+    openSaveLoadModal() {
+        const modal = document.getElementById('saveLoadModal');
+        modal.innerHTML = this.renderSaveLoadModal();
+        modal.style.display = 'block';
+        this.attachModalListeners();
+    }
+
+    renderSaveLoadModal() {
+        const hasCurrentConfig = Object.keys(this.selections).length > 0;
+
+        return `
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>💾 Save & Load Configurations</h2>
+                        <button class="modal-close" id="modalClose">×</button>
+                    </div>
+                    <div class="modal-body">
+                        ${hasCurrentConfig ? `
+                            <div class="modal-section">
+                                <h3>Save Current Configuration</h3>
+                                <p>Save your current selections to load them later.</p>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="configName" placeholder="Configuration name..." style="flex: 1; padding: 10px; border: 2px solid var(--border-color); border-radius: var(--radius-sm); font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light);">
+                                    <button class="btn btn-primary" id="saveConfigBtn">Save</button>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="modal-section">
+                            <h3>Saved Configurations</h3>
+                            ${this.renderSavedConfigs()}
+                        </div>
+
+                        <div class="modal-section">
+                            <h3>Quick Start Presets</h3>
+                            <p>Load a preset configuration to get started quickly.</p>
+                            ${this.renderPresets()}
+                        </div>
+
+                        <div class="modal-section">
+                            <h3>Import / Export</h3>
+                            <p>Share configurations by exporting to JSON or importing from a file.</p>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${hasCurrentConfig ? '<button class="btn btn-secondary" id="exportConfigBtn">📤 Export Current</button>' : ''}
+                                <button class="btn btn-secondary" id="importConfigBtn">📥 Import from File</button>
+                                <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSavedConfigs() {
+        if (this.savedConfigs.length === 0) {
+            return `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📂</div>
+                    <p>No saved configurations yet. Save your current selections above!</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="config-list">
+                ${this.savedConfigs.map((config, index) => `
+                    <div class="config-item">
+                        <div class="config-info">
+                            <h4>${config.name}</h4>
+                            <p>Saved ${new Date(config.timestamp).toLocaleDateString()}</p>
+                        </div>
+                        <div class="config-actions">
+                            <button class="config-load" data-index="${index}">Load</button>
+                            <button class="config-delete" data-index="${index}">Delete</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderPresets() {
+        const presets = [
+            {
+                name: 'Graduate Thesis',
+                icon: '🎓',
+                description: 'Formal academic writing for dissertations',
+                config: {
+                    1: 'lit_review_thematic',
+                    2: 'phd_candidate',
+                    3: 'high_natural',
+                    4: 'apa_standard',
+                    5: 'thesis_driven',
+                    6: 'high_dissertation',
+                    7: 'formal_standard',
+                    8: 'standard_sections',
+                    9: 'research_gaps'
+                }
+            },
+            {
+                name: 'ESL Student Essay',
+                icon: '✍️',
+                description: 'Natural, humanized academic writing',
+                config: {
+                    1: 'argumentative',
+                    2: 'international_grad',
+                    3: 'max_esl',
+                    4: 'apa_standard',
+                    5: 'progressive',
+                    6: 'strong_graduate',
+                    7: 'esl_formal',
+                    8: 'standard_sections',
+                    9: 'none'
+                }
+            },
+            {
+                name: 'Reflection Paper',
+                icon: '🔍',
+                description: 'Personal academic reflection',
+                config: {
+                    1: 'reflection',
+                    2: 'reflective_practitioner',
+                    3: 'personal_voice',
+                    4: 'apa_standard',
+                    5: 'question_driven',
+                    6: 'moderate_undergrad',
+                    7: 'readable_academic',
+                    8: 'reflective_5r',
+                    9: 'none'
+                }
+            },
+            {
+                name: 'Research Proposal',
+                icon: '📊',
+                description: 'Rigorous research planning document',
+                config: {
+                    1: 'research_proposal',
+                    2: 'research_scholar',
+                    3: 'subtle_polished',
+                    4: 'apa_heavy',
+                    5: 'problem_solution',
+                    6: 'maximum_research',
+                    7: 'formal_standard',
+                    8: 'standard_sections',
+                    9: 'methodological_focus'
+                }
+            }
+        ];
+
+        return `
+            <div class="preset-grid">
+                ${presets.map((preset, index) => `
+                    <div class="preset-card" data-preset="${index}">
+                        <div class="preset-icon">${preset.icon}</div>
+                        <h4>${preset.name}</h4>
+                        <p>${preset.description}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    attachModalListeners() {
+        // Close modal
+        const closeBtn = document.getElementById('modalClose');
+        const overlay = document.getElementById('modalOverlay');
+
+        closeBtn.addEventListener('click', () => this.closeModal());
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) this.closeModal();
+        });
+
+        // Save config
+        const saveBtn = document.getElementById('saveConfigBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveCurrentConfig());
+        }
+
+        // Load configs
+        document.querySelectorAll('.config-load').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                this.loadConfig(index);
+            });
+        });
+
+        // Delete configs
+        document.querySelectorAll('.config-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                this.deleteConfig(index);
+            });
+        });
+
+        // Load presets
+        document.querySelectorAll('.preset-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const index = parseInt(e.currentTarget.dataset.preset);
+                this.loadPreset(index);
+            });
+        });
+
+        // Export config
+        const exportBtn = document.getElementById('exportConfigBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportConfig());
+        }
+
+        // Import config
+        const importBtn = document.getElementById('importConfigBtn');
+        const fileInput = document.getElementById('importFileInput');
+
+        if (importBtn) {
+            importBtn.addEventListener('click', () => fileInput.click());
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => this.importConfig(e));
+        }
+    }
+
+    saveCurrentConfig() {
+        const nameInput = document.getElementById('configName');
+        const name = nameInput.value.trim();
+
+        if (!name) {
+            alert('Please enter a name for this configuration.');
+            return;
+        }
+
+        const config = {
+            name: name,
+            selections: this.selections,
+            timestamp: new Date().toISOString()
+        };
+
+        this.savedConfigs.push(config);
+        localStorage.setItem('savedConfigs', JSON.stringify(this.savedConfigs));
+
+        // Refresh modal
+        this.openSaveLoadModal();
+    }
+
+    loadConfig(index) {
+        const config = this.savedConfigs[index];
+        this.selections = { ...config.selections };
+        this.closeModal();
+
+        // Navigate to first step if not there already
+        if (this.currentStep === 0) {
+            this.startJourney();
+        } else {
+            this.renderStep();
+            this.updateHeaderStats();
+            this.updateButtons();
+        }
+
+        alert(`Configuration "${config.name}" loaded successfully!`);
+    }
+
+    deleteConfig(index) {
+        const config = this.savedConfigs[index];
+        if (confirm(`Delete configuration "${config.name}"?`)) {
+            this.savedConfigs.splice(index, 1);
+            localStorage.setItem('savedConfigs', JSON.stringify(this.savedConfigs));
+            this.openSaveLoadModal();
+        }
+    }
+
+    loadPreset(index) {
+        const presets = [
+            {
+                name: 'Graduate Thesis',
+                config: {
+                    1: 'lit_review_thematic',
+                    2: 'phd_candidate',
+                    3: 'high_natural',
+                    4: 'apa_standard',
+                    5: 'thesis_driven',
+                    6: 'high_dissertation',
+                    7: 'formal_standard',
+                    8: 'standard_sections',
+                    9: 'research_gaps'
+                }
+            },
+            {
+                name: 'ESL Student Essay',
+                config: {
+                    1: 'argumentative',
+                    2: 'international_grad',
+                    3: 'max_esl',
+                    4: 'apa_standard',
+                    5: 'progressive',
+                    6: 'strong_graduate',
+                    7: 'esl_formal',
+                    8: 'standard_sections',
+                    9: 'none'
+                }
+            },
+            {
+                name: 'Reflection Paper',
+                config: {
+                    1: 'reflection',
+                    2: 'reflective_practitioner',
+                    3: 'personal_voice',
+                    4: 'apa_standard',
+                    5: 'question_driven',
+                    6: 'moderate_undergrad',
+                    7: 'readable_academic',
+                    8: 'reflective_5r',
+                    9: 'none'
+                }
+            },
+            {
+                name: 'Research Proposal',
+                config: {
+                    1: 'research_proposal',
+                    2: 'research_scholar',
+                    3: 'subtle_polished',
+                    4: 'apa_heavy',
+                    5: 'problem_solution',
+                    6: 'maximum_research',
+                    7: 'formal_standard',
+                    8: 'standard_sections',
+                    9: 'methodological_focus'
+                }
+            }
+        ];
+
+        const preset = presets[index];
+        this.selections = { ...preset.config };
+        this.closeModal();
+
+        // Navigate to first step
+        if (this.currentStep === 0) {
+            this.startJourney();
+        } else {
+            this.renderStep();
+            this.updateHeaderStats();
+            this.updateButtons();
+        }
+
+        alert(`Preset "${preset.name}" loaded! You can review and modify selections.`);
+    }
+
+    exportConfig() {
+        const config = {
+            name: "Exported Configuration",
+            selections: this.selections,
+            timestamp: new Date().toISOString(),
+            version: "1.0"
+        };
+
+        const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `prompt-config-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('Configuration exported successfully!');
+    }
+
+    importConfig(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const config = JSON.parse(e.target.result);
+
+                if (!config.selections) {
+                    throw new Error('Invalid configuration file');
+                }
+
+                this.selections = { ...config.selections };
+                this.closeModal();
+
+                if (this.currentStep === 0) {
+                    this.startJourney();
+                } else {
+                    this.renderStep();
+                    this.updateHeaderStats();
+                    this.updateButtons();
+                }
+
+                alert('Configuration imported successfully!');
+            } catch (error) {
+                alert('Error importing configuration: ' + error.message);
+            }
+        };
+
+        reader.readAsText(file);
+        event.target.value = ''; // Reset file input
+    }
+
+    closeModal() {
+        const modal = document.getElementById('saveLoadModal');
+        modal.style.display = 'none';
+        modal.innerHTML = '';
     }
 }
 
