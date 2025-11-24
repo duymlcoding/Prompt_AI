@@ -86,6 +86,18 @@ const promptTemplates = {
             return '';
         }
 
+        // Handle grouped-single sections (with subsections)
+        if (section.subsections) {
+            for (const subsection of section.subsections) {
+                const option = subsection.options.find(opt => opt.value === selectedValue);
+                if (option) {
+                    return option.promptFragment;
+                }
+            }
+            return '';
+        }
+
+        // Handle regular single-select sections
         const option = section.options.find(opt => opt.value === selectedValue);
         return option ? option.promptFragment : '';
     },
