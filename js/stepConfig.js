@@ -14,95 +14,119 @@ const promptSteps = [
                 required: true,
                 componentTarget: "WORD_COUNT",
                 min: 100,
-                max: 2000,
-                step: 100,
-                default: 800,
-                promptFragment: "STRICT WORD COUNT REQUIREMENT: The writing MUST contain exactly {VALUE} words (±5 words tolerance). Count every word carefully. If you reach the word limit mid-sentence, complete that sentence naturally, but do not exceed {VALUE} + 5 words total. This is a firm requirement that must be followed precisely."
+                max: 1500,
+                step: 50,
+                default: 600,
+                promptFragment: "STRICT WORD COUNT REQUIREMENT: The writing MUST contain exactly {VALUE} words (±50 words tolerance). Count every word carefully. If you reach the word limit mid-sentence, complete that sentence naturally, but do not exceed {VALUE} + 50 words total. This is a firm requirement that must be followed precisely."
             },
             {
                 id: "writing_type",
                 title: "Writing Type",
-                type: "single", // single-select
+                type: "grouped-single", // single-select with subsections
                 required: true,
                 componentTarget: "WRITING_TYPE",
-                options: [
+                subsections: [
                     {
-                        value: "reflection",
-                        label: "Reflection Essay",
-                        description: "Personal academic reflection on learning journey and professional development",
-                        promptFragment: "This is a reflective essay that examines personal learning experiences and professional development. The writing should demonstrate critical self-assessment, connect theory to practice, and show how experiences have shaped understanding and future professional direction. Use first-person voice to explore growth, challenges overcome, and lessons learned while maintaining academic rigor and connecting personal insights to scholarly frameworks."
+                        id: "academic_research",
+                        title: "Academic Research Writing",
+                        options: [
+                            {
+                                value: "research_proposal",
+                                label: "Research Proposal",
+                                description: "Propose new research with methodology and significance",
+                                promptFragment: "This is a research proposal that outlines a planned study, demonstrates its significance, presents methodology, and addresses feasibility. The writing should establish the research problem and its importance, review relevant literature to show knowledge gaps, present clear research questions or hypotheses, detail proposed methodology with justification, discuss expected contributions, and address practical considerations. Convince readers the research is worthwhile, feasible, and methodologically sound."
+                            },
+                            {
+                                value: "methodology",
+                                label: "Methodology Section",
+                                description: "Detailed research methods and procedures explanation",
+                                promptFragment: "This is a methodology section that comprehensively describes research design, data collection procedures, analytical methods, and justifications for methodological choices. The writing should provide sufficient detail for replication, explain why specific methods were chosen, address limitations and validity concerns, and demonstrate rigorous attention to research ethics and methodological appropriateness for answering the research questions."
+                            },
+                            {
+                                value: "results",
+                                label: "Results Section",
+                                description: "Present empirical findings with data analysis",
+                                promptFragment: "This is a results section that presents empirical findings systematically and objectively. The writing should organize results logically (often by research question or hypothesis), present data clearly with appropriate statistical analysis, use tables and figures to support textual description, and report findings without interpretation or discussion. Maintain objectivity while ensuring accessibility and clarity in presenting complex data."
+                            }
+                        ]
                     },
                     {
-                        value: "methodology",
-                        label: "Methodology Section",
-                        description: "Detailed research methods and procedures explanation",
-                        promptFragment: "This is a methodology section that comprehensively describes research design, data collection procedures, analytical methods, and justifications for methodological choices. The writing should provide sufficient detail for replication, explain why specific methods were chosen, address limitations and validity concerns, and demonstrate rigorous attention to research ethics and methodological appropriateness for answering the research questions."
+                        id: "literature_review",
+                        title: "Literature Review",
+                        options: [
+                            {
+                                value: "lit_review_thematic",
+                                label: "Literature Review (Thematic)",
+                                description: "Organize research by themes and concepts across time",
+                                promptFragment: "This is a thematic literature review that organizes scholarly sources by key themes, concepts, or debates rather than chronologically or by author. The writing should identify major themes in the literature, synthesize findings from multiple sources under each theme, show how sources relate to and build upon each other, identify patterns and contradictions, and demonstrate critical analysis rather than mere summary. Create an integrated narrative that advances understanding of each theme."
+                            },
+                            {
+                                value: "lit_review_chronological",
+                                label: "Literature Review (Chronological)",
+                                description: "Trace research development over time",
+                                promptFragment: "This is a chronological literature review that traces how research on the topic has developed over time. The writing should show historical progression of ideas, identify turning points or paradigm shifts, demonstrate how earlier research influenced later work, and build understanding progressively. While organized temporally, maintain analytical depth by showing not just what happened when, but how and why the field evolved."
+                            }
+                        ]
                     },
                     {
-                        value: "results",
-                        label: "Results Section",
-                        description: "Present empirical findings with data analysis",
-                        promptFragment: "This is a results section that presents empirical findings systematically and objectively. The writing should organize results logically (often by research question or hypothesis), present data clearly with appropriate statistical analysis, use tables and figures to support textual description, and report findings without interpretation or discussion. Maintain objectivity while ensuring accessibility and clarity in presenting complex data."
+                        id: "reflective_discussion",
+                        title: "Reflective & Discussion",
+                        options: [
+                            {
+                                value: "reflection",
+                                label: "Reflection Essay",
+                                description: "Personal academic reflection on learning journey and professional development",
+                                promptFragment: "This is a reflective essay that examines personal learning experiences and professional development. The writing should demonstrate critical self-assessment, connect theory to practice, and show how experiences have shaped understanding and future professional direction. Use first-person voice to explore growth, challenges overcome, and lessons learned while maintaining academic rigor and connecting personal insights to scholarly frameworks."
+                            },
+                            {
+                                value: "discussion",
+                                label: "Discussion Section",
+                                description: "Interpret findings and connect to broader literature",
+                                promptFragment: "This is a discussion section that interprets research findings, connects results to existing literature, and explores implications. The writing should explain what findings mean, compare and contrast with previous research, address unexpected results, acknowledge limitations honestly, and build toward implications for theory, practice, or future research. Move from specific findings to broader significance while maintaining scholarly rigor."
+                            },
+                            {
+                                value: "introduction",
+                                label: "Introduction Section",
+                                description: "Establish context, review literature, and present research direction",
+                                promptFragment: "This is an introduction section that establishes research context, reviews relevant literature, identifies gaps or problems, and presents the research question or thesis. The writing should move from broad context to specific focus (funnel structure), demonstrate knowledge of existing research, justify the study's significance, and provide a clear roadmap for what follows. Balance accessibility for broader readers with disciplinary depth."
+                            }
+                        ]
                     },
                     {
-                        value: "discussion",
-                        label: "Discussion Section",
-                        description: "Interpret findings and connect to broader literature",
-                        promptFragment: "This is a discussion section that interprets research findings, connects results to existing literature, and explores implications. The writing should explain what findings mean, compare and contrast with previous research, address unexpected results, acknowledge limitations honestly, and build toward implications for theory, practice, or future research. Move from specific findings to broader significance while maintaining scholarly rigor."
-                    },
-                    {
-                        value: "introduction",
-                        label: "Introduction Section",
-                        description: "Establish context, review literature, and present research direction",
-                        promptFragment: "This is an introduction section that establishes research context, reviews relevant literature, identifies gaps or problems, and presents the research question or thesis. The writing should move from broad context to specific focus (funnel structure), demonstrate knowledge of existing research, justify the study's significance, and provide a clear roadmap for what follows. Balance accessibility for broader readers with disciplinary depth."
-                    },
-                    {
-                        value: "lit_review_thematic",
-                        label: "Literature Review (Thematic)",
-                        description: "Organize research by themes and concepts across time",
-                        promptFragment: "This is a thematic literature review that organizes scholarly sources by key themes, concepts, or debates rather than chronologically or by author. The writing should identify major themes in the literature, synthesize findings from multiple sources under each theme, show how sources relate to and build upon each other, identify patterns and contradictions, and demonstrate critical analysis rather than mere summary. Create an integrated narrative that advances understanding of each theme."
-                    },
-                    {
-                        value: "lit_review_chronological",
-                        label: "Literature Review (Chronological)",
-                        description: "Trace research development over time",
-                        promptFragment: "This is a chronological literature review that traces how research on the topic has developed over time. The writing should show historical progression of ideas, identify turning points or paradigm shifts, demonstrate how earlier research influenced later work, and build understanding progressively. While organized temporally, maintain analytical depth by showing not just what happened when, but how and why the field evolved."
-                    },
-                    {
-                        value: "argumentative",
-                        label: "Argumentative Essay",
-                        description: "Present and defend a clear position with evidence",
-                        promptFragment: "This is an argumentative essay that presents a clear position and defends it with evidence and reasoning. The writing should state a debatable thesis early, present supporting arguments systematically, anticipate and address counterarguments, use evidence from credible sources to support claims, and build toward a persuasive conclusion. Maintain logical rigor while acknowledging complexity and alternative perspectives where appropriate."
-                    },
-                    {
-                        value: "comparative",
-                        label: "Comparative Analysis",
-                        description: "Systematic comparison of cases, theories, or concepts",
-                        promptFragment: "This is a comparative analysis that systematically examines similarities and differences between two or more cases, theories, concepts, or phenomena. The writing should establish clear criteria for comparison, organize comparison either point-by-point or subject-by-subject, analyze rather than merely describe differences, and build toward conclusions about what these comparisons reveal. Use comparison to deepen understanding rather than simply catalog differences."
-                    },
-                    {
-                        value: "case_study",
-                        label: "Case Study Analysis",
-                        description: "In-depth examination of specific case with broader implications",
-                        promptFragment: "This is a case study analysis that examines a specific case in depth to extract broader principles, test theory, or illustrate concepts. The writing should provide rich contextual detail about the case, apply analytical frameworks or theories, identify patterns and causal relationships, and show how specific case illuminates broader phenomena. Balance particular details with generalizable insights."
-                    },
-                    {
-                        value: "research_proposal",
-                        label: "Research Proposal",
-                        description: "Propose new research with methodology and significance",
-                        promptFragment: "This is a research proposal that outlines a planned study, demonstrates its significance, presents methodology, and addresses feasibility. The writing should establish the research problem and its importance, review relevant literature to show knowledge gaps, present clear research questions or hypotheses, detail proposed methodology with justification, discuss expected contributions, and address practical considerations. Convince readers the research is worthwhile, feasible, and methodologically sound."
-                    },
-                    {
-                        value: "critical_analysis",
-                        label: "Critical Analysis Essay",
-                        description: "Evaluate arguments, assumptions, and evidence rigorously",
-                        promptFragment: "This is a critical analysis essay that evaluates arguments, examines underlying assumptions, assesses evidence quality, and identifies strengths and limitations. The writing should go beyond summary to analyze how arguments work, question taken-for-granted assumptions, evaluate logical coherence, assess evidence appropriateness, and offer reasoned judgments. Demonstrate analytical depth while maintaining fairness to the work being analyzed."
+                        id: "analytical_writing",
+                        title: "Analytical Writing",
+                        options: [
+                            {
+                                value: "argumentative",
+                                label: "Argumentative Essay",
+                                description: "Present and defend a clear position with evidence",
+                                promptFragment: "This is an argumentative essay that presents a clear position and defends it with evidence and reasoning. The writing should state a debatable thesis early, present supporting arguments systematically, anticipate and address counterarguments, use evidence from credible sources to support claims, and build toward a persuasive conclusion. Maintain logical rigor while acknowledging complexity and alternative perspectives where appropriate."
+                            },
+                            {
+                                value: "critical_analysis",
+                                label: "Critical Analysis Essay",
+                                description: "Evaluate arguments, assumptions, and evidence rigorously",
+                                promptFragment: "This is a critical analysis essay that evaluates arguments, examines underlying assumptions, assesses evidence quality, and identifies strengths and limitations. The writing should go beyond summary to analyze how arguments work, question taken-for-granted assumptions, evaluate logical coherence, assess evidence appropriateness, and offer reasoned judgments. Demonstrate analytical depth while maintaining fairness to the work being analyzed."
+                            },
+                            {
+                                value: "comparative",
+                                label: "Comparative Analysis",
+                                description: "Systematic comparison of cases, theories, or concepts",
+                                promptFragment: "This is a comparative analysis that systematically examines similarities and differences between two or more cases, theories, concepts, or phenomena. The writing should establish clear criteria for comparison, organize comparison either point-by-point or subject-by-subject, analyze rather than merely describe differences, and build toward conclusions about what these comparisons reveal. Use comparison to deepen understanding rather than simply catalog differences."
+                            },
+                            {
+                                value: "case_study",
+                                label: "Case Study Analysis",
+                                description: "In-depth examination of specific case with broader implications",
+                                promptFragment: "This is a case study analysis that examines a specific case in depth to extract broader principles, test theory, or illustrate concepts. The writing should provide rich contextual detail about the case, apply analytical frameworks or theories, identify patterns and causal relationships, and show how specific case illuminates broader phenomena. Balance particular details with generalizable insights."
+                            }
+                        ]
                     }
                 ]
             },
             {
                 id: "writer_role",
-                title: "Writer Role & Voice",
+                title: "Writer Role",
                 type: "single",
                 required: true,
                 componentTarget: "ROLE",
@@ -110,50 +134,71 @@ const promptSteps = [
                     {
                         value: "phd_researcher",
                         label: "PhD Researcher",
-                        description: "Advanced scholar with deep expertise and independent voice",
-                        promptFragment: "You are a PhD-level researcher with substantial expertise in your field. Your writing demonstrates sophisticated command of theoretical frameworks, methodological precision, and critical engagement with scholarly debates. You write with intellectual confidence while remaining appropriately cautious about claims. Your voice shows independent thinking developed through years of deep study. You balance authoritative knowledge with scholarly humility, acknowledging complexity and uncertainty where it exists. Your prose is precise, nuanced, and demonstrates facility with discipline-specific discourse while remaining accessible to fellow scholars. You naturally integrate multiple theoretical perspectives and show awareness of methodological trade-offs. Every paragraph builds on the previous one with smooth transitions to show logical progression and cohesion."
+                        description: "Advanced scholar with deep expertise and independent analysis",
+                        promptFragment: "You are a PhD-level researcher with substantial expertise in your field. Your writing demonstrates sophisticated command of theoretical frameworks, methodological precision, and critical engagement with scholarly debates. You write with intellectual confidence while remaining appropriately cautious about claims. You balance authoritative knowledge with scholarly humility, acknowledging complexity and uncertainty where it exists. Your prose is precise and nuanced, demonstrating facility with discipline-specific discourse while remaining accessible to fellow scholars. You naturally integrate multiple theoretical perspectives and show awareness of methodological trade-offs."
                     },
                     {
                         value: "masters_student",
                         label: "Master's Student",
                         description: "Developing scholar showing growing analytical sophistication",
-                        promptFragment: "You are an advanced master's student developing scholarly expertise. Your writing demonstrates solid grasp of course concepts and growing analytical sophistication, though you are still building toward the independent voice of a senior researcher. You engage thoughtfully with required readings and show developing critical thinking skills. Your prose is careful and well-organized, showing attention to academic conventions while occasionally revealing the learning process. You connect ideas logically and demonstrate understanding through clear explanations. You write to show comprehension and analytical ability rather than claiming expert authority. Your voice balances student humility with emerging scholarly confidence. Maintain a clear flow of ideas with humanized touch, ensuring every paragraph builds on the previous one with smooth transitions."
+                        promptFragment: "You are an advanced master's student developing scholarly expertise. Your writing demonstrates solid grasp of course concepts and growing analytical sophistication, though you are still building toward the independent voice of a senior researcher. You engage thoughtfully with required readings and show developing critical thinking skills. Your prose is careful and well-organized, showing attention to academic conventions. You connect ideas logically and demonstrate understanding through clear explanations. You write to show comprehension and analytical ability rather than claiming expert authority."
                     },
                     {
                         value: "international_graduate",
                         label: "International Graduate Student",
-                        description: "Proficient multilingual scholar with careful academic voice",
-                        promptFragment: "You are an international graduate student writing in English as an additional language. Your writing demonstrates strong academic competence with subtle linguistic patterns common among proficient multilingual scholars. You express complex ideas clearly while occasionally using slightly formal constructions or explicit logical markers ('Therefore,' 'As a result,' 'It can be observed that') that signal careful, deliberate composition. Your prose shows attention to precision and correctness, sometimes favoring clarity over idiomatic brevity. You write complete, grammatically sound sentences with thoughtful structure. Your voice reflects serious scholarly engagement, careful reasoning, and respect for academic conventions. Small imperfections in rhythm or word choice may appear but never compromise meaning or professionalism. You maintain clear flow with humanized touch, building each paragraph on the previous one through smooth transitions."
+                        description: "Proficient multilingual scholar with careful academic approach",
+                        promptFragment: "You are an international graduate student writing in English as an additional language. Your writing demonstrates strong academic competence with subtle linguistic patterns common among proficient multilingual scholars. You express complex ideas clearly while occasionally using slightly formal constructions or explicit logical markers ('Therefore,' 'As a result,' 'It can be observed that') that signal careful, deliberate composition. Your prose shows attention to precision and correctness, sometimes favoring clarity over idiomatic brevity. You write complete, grammatically sound sentences with thoughtful structure."
                     },
                     {
                         value: "honors_undergrad",
                         label: "Honors Undergraduate",
                         description: "Strong undergraduate showing emerging analytical ability",
-                        promptFragment: "You are an honors undergraduate student demonstrating strong academic ability and developing analytical skills. Your writing shows solid understanding of course material and growing capacity for independent analysis, though without the theoretical sophistication of graduate work. You engage seriously with readings and assignments, showing thoughtfulness and intellectual curiosity. Your prose is clear, organized, and increasingly confident, though you write from a learning position rather than claiming expertise. You demonstrate understanding through careful explanation and make connections between ideas thoughtfully. Your voice shows genuine engagement with material and developing scholarly identity. You maintain coherent flow, ensuring each paragraph builds logically on the previous one with appropriate transitions."
+                        promptFragment: "You are an honors undergraduate student demonstrating strong academic ability and developing analytical skills. Your writing shows solid understanding of course material and growing capacity for independent analysis, though without the theoretical sophistication of graduate work. You engage seriously with readings and assignments, showing thoughtfulness and intellectual curiosity. Your prose is clear, organized, and increasingly confident, though you write from a learning position rather than claiming expertise. You demonstrate understanding through careful explanation and make connections between ideas thoughtfully."
                     },
                     {
-                        value: "reflective_practitioner",
-                        label: "Reflective Practitioner",
-                        description: "Professional connecting practice with academic theory",
-                        promptFragment: "You are a reflective practitioner bringing professional experience into dialogue with academic theory. Your writing connects workplace realities with scholarly concepts, showing how theory illuminates practice and practice tests theory. You write from lived professional experience while engaging seriously with academic literature. Your voice balances practical wisdom with scholarly rigor, demonstrating both real-world knowledge and intellectual analysis. You use first-person voice when reflecting on experience while maintaining analytical distance when examining broader implications. Your prose shows comfort moving between concrete professional examples and abstract theoretical concepts. You write to make sense of experience through scholarly frameworks, connecting personal learning to broader professional knowledge. Every paragraph flows naturally to the next, creating cohesive narrative of practice meeting theory."
+                        value: "professional_practitioner",
+                        label: "Professional/Practitioner",
+                        description: "Professional bringing real-world experience to academic writing",
+                        promptFragment: "You are a professional or practitioner bringing workplace experience into dialogue with academic work. Your writing demonstrates both practical knowledge from professional experience and engagement with scholarly concepts. You write from a position of professional competence while showing respect for academic conventions. Your prose balances concrete professional insights with analytical depth, demonstrating both real-world expertise and intellectual engagement. You connect practical experience with theoretical frameworks naturally."
+                    }
+                ]
+            },
+            {
+                id: "writer_voice",
+                title: "Writer Voice",
+                type: "single",
+                required: true,
+                componentTarget: "VOICE",
+                options: [
+                    {
+                        value: "formal_academic",
+                        label: "Formal Academic",
+                        description: "Traditional scholarly tone with precise, disciplined language",
+                        promptFragment: "Write in a formal academic voice with precise, disciplined language. Maintain professional distance and objectivity throughout. Use sophisticated vocabulary and complex sentence structures appropriate to scholarly discourse. Follow strict academic conventions in tone and style. Present ideas with authoritative confidence while maintaining intellectual rigor. Avoid colloquialisms and maintain consistent formality across all sections. Every paragraph builds on the previous one with smooth transitions showing logical progression and cohesion."
                     },
                     {
-                        value: "policy_analyst",
-                        label: "Policy Analyst/Professional Writer",
-                        description: "Evidence-driven professional writing for decision-making",
-                        promptFragment: "You are a policy analyst or professional writer creating evidence-based analysis for decision-makers. Your writing balances academic rigor with practical clarity, making complex research accessible without oversimplifying. You ground arguments in credible evidence while maintaining awareness of real-world constraints and implications. Your voice is authoritative but not academic-insular, writing to inform action rather than purely advance theoretical knowledge. You present nuanced analysis while remaining clear and direct. Your prose moves efficiently from context to analysis to implications, always aware of reader needs and practical application. You write with professional competence, showing both intellectual depth and communication skill. Maintain logical flow with clear transitions, ensuring each paragraph builds toward actionable understanding."
+                        value: "conversational_academic",
+                        label: "Conversational Academic",
+                        description: "Accessible scholarly voice that maintains intellectual substance",
+                        promptFragment: "Write in a conversational yet scholarly voice that balances accessibility with intellectual substance. Explain complex ideas clearly using concrete examples and relatable language without dumbing down content. Your prose has natural rhythm variation, mixing shorter punchy sentences with longer flowing ones. Occasionally use conversational markers ('Here is what I mean,' 'Think about it this way') while keeping scholarly focus. Show your thinking process and acknowledge uncertainty where appropriate. Write like a knowledgeable person thinking through ideas with the reader, not performing expertise at them. Maintain clear flow of ideas with humanized touch, ensuring every paragraph builds on the previous one with smooth transitions."
                     },
                     {
-                        value: "critical_theorist",
-                        label: "Critical Scholar",
-                        description: "Examining power relations and questioning assumptions",
-                        promptFragment: "You are a critical scholar examining power relations, questioning dominant assumptions, and foregrounding often-marginalized perspectives. Your writing demonstrates theoretical sophistication and commitment to social justice or critical inquiry. You interrogate taken-for-granted categories, reveal underlying power dynamics, and ask whose interests are served by particular frameworks or practices. Your voice is intellectually sharp and politically aware without being dogmatic. You engage seriously with critical theoretical traditions while remaining accessible to thoughtful readers. Your prose balances analytical rigor with ethical commitment, showing both intellectual depth and normative grounding. You write to reveal, question, and potentially transform understanding. Every paragraph connects to broader critical project through smooth transitions and logical development."
+                        value: "critical_analytical",
+                        label: "Critical/Analytical",
+                        description: "Questioning voice that examines assumptions and power dynamics",
+                        promptFragment: "Write in a critical, analytical voice that questions assumptions and examines underlying power dynamics. Interrogate taken-for-granted categories and ask whose interests are served by particular frameworks. Your voice is intellectually sharp and analytically rigorous without being dogmatic. Engage with complexity and contradiction, revealing tensions rather than smoothing them over. Your prose balances critical questioning with constructive analysis. Show awareness of how language, categories, and frameworks shape understanding. Every paragraph connects to the broader analytical project through smooth transitions and logical development."
                     },
                     {
-                        value: "human_conversational",
-                        label: "Humanized Conversational Academic",
-                        description: "Authentic dialogue balancing warmth with scholarly standards",
-                        promptFragment: "You are a human writer who creates authentic, conversational content that feels like real dialogue with someone you genuinely care about helping. You write to connect, not to impress, balancing accessibility with intellectual substance. Your voice shows personality and warmth while maintaining academic credibility. You explain complex ideas clearly, using concrete examples and relatable language without dumbing down content. Your prose has natural rhythm variation, mixing shorter punchy sentences with longer flowing ones that breathe. You occasionally use conversational markers ('Here is what I mean,' 'Think about it this way') while keeping scholarly focus. You show your thinking process, acknowledging uncertainty where appropriate. Your writing feels like a knowledgeable person thinking through ideas with the reader, not performing expertise at them. Maintain clear flow of ideas with humanized touch, ensuring every paragraph builds on the previous one with smooth transitions showing logical progression and cohesion."
+                        value: "reflective_personal",
+                        label: "Reflective/Personal",
+                        description: "First-person voice connecting personal experience with analysis",
+                        promptFragment: "Write in a reflective, personal voice that uses first-person perspective to connect personal experience with broader analysis. Use 'I' to claim ownership of ideas, describe observations, and position arguments ('I argue,' 'I observed,' 'From my analysis,' 'In my view'). Show genuine engagement with material through personal reflection while maintaining analytical depth. Your voice balances personal insight with scholarly rigor, demonstrating both lived experience and intellectual analysis. Move naturally between personal narrative and broader implications. Every paragraph flows naturally to the next, creating cohesive narrative that connects experience with understanding."
+                    },
+                    {
+                        value: "professional_clear",
+                        label: "Professional/Clear",
+                        description: "Direct, efficient voice for practical and policy-oriented writing",
+                        promptFragment: "Write in a professional, clear voice that prioritizes directness and practical clarity. Make complex ideas accessible without oversimplifying. Your voice is authoritative but not academic-insular, writing to inform understanding and action. Present nuanced analysis while remaining clear and direct. Your prose moves efficiently from context to analysis to implications, always aware of reader needs and practical application. Avoid unnecessary jargon while maintaining intellectual credibility. Show professional competence through both analytical depth and communication clarity. Maintain logical flow with clear transitions, ensuring each paragraph builds toward actionable understanding."
                     }
                 ]
             }
@@ -278,6 +323,12 @@ const promptSteps = [
                 componentTarget: "CITATION_STYLE",
                 options: [
                     {
+                        value: "no_citation",
+                        label: "No Citation Required",
+                        description: "Personal reflection or informal writing without formal citations",
+                        promptFragment: "This writing does not require formal citations. You may reference ideas, experiences, or concepts informally without citation formatting. If you mention sources or influences, do so conversationally without formal bibliographic structure. Focus on expressing ideas and experiences directly without academic citation apparatus."
+                    },
+                    {
                         value: "apa_7",
                         label: "APA 7th Edition",
                         description: "Author-date with reference list",
@@ -390,18 +441,89 @@ const promptSteps = [
         sections: [
             {
                 id: "core_style_rules",
-                title: "Core Style Requirements (Always Applied)",
-                type: "fixed", // These are always included, no selection needed
-                required: true,
+                title: "Core Style Requirements",
+                type: "multi",
+                required: false,
                 componentTarget: "CORE_STYLE",
-                rules: [
-                    "PARAGRAPH STRUCTURE: Each paragraph must follow academic paragraph construction: (1) Begin with a clear topic sentence that states the main idea, (2) Develop with 3-5 supporting sentences containing evidence, examples, or analysis, (3) Include explanation sentences that connect evidence to your thesis, (4) End with a concluding or transition sentence that links to the next paragraph. Never write single-sentence paragraphs.",
-                    "PARAGRAPH UNITY AND COHERENCE: Every sentence within a paragraph must relate directly to the paragraph's topic sentence. If introducing a new main idea, start a new paragraph. Use transitional words and phrases (however, furthermore, for example, in contrast, as a result) to show logical relationships between sentences and between paragraphs.",
-                    "DEVELOPMENT AND DEPTH: Never make claims without support. After stating a point, immediately develop it with specific details, evidence, or reasoning. Avoid surface-level description; instead, analyze what the information means, why it matters, and how it connects to your broader argument. Ask yourself 'So what?' after each point to ensure you explain significance.",
-                    "SENTENCE VARIETY AND CLARITY: Mix sentence structures for readability - combine simple, compound, and complex sentences. Vary sentence length naturally, with most sentences between 15-25 words. Reduce comma usage; avoid long strings of clauses separated by commas. Break up overly long sentences (30+ words). Avoid em dashes. Front-load important information in sentences rather than burying it in dependent clauses.",
-                    "WORD CHOICE AND PRECISION: Choose specific, concrete nouns and active verbs over vague, abstract language. Avoid repetition of the same word within a paragraph - use pronouns or appropriate synonyms after the second use. Prefer precise academic vocabulary over casual expressions, but avoid unnecessarily complex jargon. No contractions.",
-                    "HUMAN WRITING MARKERS: Reduce AI-like patterns by (1) avoiding comma splices and long comma-separated clauses, (2) breaking up sentences naturally, (3) varying paragraph length (3-7 sentences typically), (4) using concrete examples before abstract explanations, (5) showing your reasoning process rather than just stating conclusions. Let ideas develop progressively rather than appearing fully formed.",
-                    "FORMATTING AND MECHANICS: No contractions. Maintain correct subject-verb agreement. Write complete sentences. Do not use unusual characters like ** or ## for emphasis. Do not format lists as 'Heading:' with colons. Use standard academic formatting with proper paragraph breaks. Maintain consistent verb tense within sections (typically past tense for literature review and methodology, present tense for analysis and discussion)."
+                subsections: [
+                    {
+                        id: "paragraph_structure",
+                        title: "PARAGRAPH STRUCTURE",
+                        options: [
+                            {
+                                value: "academic_paragraph_structure",
+                                label: "Academic Paragraph Construction",
+                                description: "Topic sentence, 3-5 supporting sentences, concluding/transition sentence",
+                                promptFragment: "Each paragraph must follow academic paragraph construction: (1) Begin with a clear topic sentence that states the main idea, (2) Develop with 3-5 supporting sentences containing evidence, examples, or analysis, (3) Include explanation sentences that connect evidence to your thesis, (4) End with a concluding or transition sentence that links to the next paragraph. Never write single-sentence paragraphs."
+                            },
+                            {
+                                value: "paragraph_unity_coherence",
+                                label: "Paragraph Unity and Coherence",
+                                description: "All sentences relate to topic sentence, use transitional phrases",
+                                promptFragment: "Every sentence within a paragraph must relate directly to the paragraph's topic sentence. If introducing a new main idea, start a new paragraph. Use transitional words and phrases (however, furthermore, for example, in contrast, as a result) to show logical relationships between sentences and between paragraphs."
+                            }
+                        ]
+                    },
+                    {
+                        id: "development_depth",
+                        title: "DEVELOPMENT AND DEPTH",
+                        options: [
+                            {
+                                value: "support_claims",
+                                label: "Support All Claims",
+                                description: "Never make unsupported claims, develop with evidence and analysis",
+                                promptFragment: "Never make claims without support. After stating a point, immediately develop it with specific details, evidence, or reasoning. Avoid surface-level description; instead, analyze what the information means, why it matters, and how it connects to your broader argument. Ask yourself 'So what?' after each point to ensure you explain significance."
+                            }
+                        ]
+                    },
+                    {
+                        id: "sentence_style",
+                        title: "SENTENCE VARIETY AND CLARITY",
+                        options: [
+                            {
+                                value: "sentence_variety",
+                                label: "Varied Sentence Structure",
+                                description: "Mix simple, compound, and complex sentences naturally",
+                                promptFragment: "Mix sentence structures for readability - combine simple, compound, and complex sentences. Vary sentence length naturally, with most sentences between 15-25 words. Reduce comma usage; avoid long strings of clauses separated by commas. Break up overly long sentences (30+ words). Avoid em dashes. Front-load important information in sentences rather than burying it in dependent clauses."
+                            }
+                        ]
+                    },
+                    {
+                        id: "word_choice",
+                        title: "WORD CHOICE AND PRECISION",
+                        options: [
+                            {
+                                value: "precise_vocabulary",
+                                label: "Precise, Specific Language",
+                                description: "Concrete nouns, active verbs, avoid repetition",
+                                promptFragment: "Choose specific, concrete nouns and active verbs over vague, abstract language. Avoid repetition of the same word within a paragraph - use pronouns or appropriate synonyms after the second use. Prefer precise academic vocabulary over casual expressions, but avoid unnecessarily complex jargon. No contractions."
+                            }
+                        ]
+                    },
+                    {
+                        id: "human_markers",
+                        title: "HUMAN WRITING MARKERS",
+                        options: [
+                            {
+                                value: "natural_flow",
+                                label: "Natural, Progressive Development",
+                                description: "Avoid AI patterns, show reasoning process, vary paragraph length",
+                                promptFragment: "Reduce AI-like patterns by (1) avoiding comma splices and long comma-separated clauses, (2) breaking up sentences naturally, (3) varying paragraph length (3-7 sentences typically), (4) using concrete examples before abstract explanations, (5) showing your reasoning process rather than just stating conclusions. Let ideas develop progressively rather than appearing fully formed."
+                            }
+                        ]
+                    },
+                    {
+                        id: "formatting_mechanics",
+                        title: "FORMATTING AND MECHANICS",
+                        options: [
+                            {
+                                value: "academic_formatting",
+                                label: "Standard Academic Formatting",
+                                description: "Proper mechanics, verb tense consistency, no unusual characters",
+                                promptFragment: "No contractions. Maintain correct subject-verb agreement. Write complete sentences. Do not use unusual characters like ** or ## for emphasis. Do not format lists as 'Heading:' with colons. Use standard academic formatting with proper paragraph breaks. Maintain consistent verb tense within sections (typically past tense for literature review and methodology, present tense for analysis and discussion)."
+                            }
+                        ]
+                    }
                 ]
             },
             {

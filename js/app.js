@@ -135,9 +135,16 @@ class PromptGenerator {
         } else if (section.type === 'range') {
             // Range slider
             html += this.renderRangeSlider(stepId, section);
+        } else if (section.type === 'grouped-single') {
+            // Single-select with subsections (like writing_type)
+            html += this.renderGroupedSingleSelect(stepId, filteredSection);
         } else if (section.type === 'multi') {
-            // Multi-select - checkboxes
-            html += this.renderMultiSelect(stepId, filteredSection);
+            // Check if it has subsections
+            if (section.subsections) {
+                html += this.renderGroupedMultiSelect(stepId, filteredSection);
+            } else {
+                html += this.renderMultiSelect(stepId, filteredSection);
+            }
         } else {
             // Single-select - radio buttons (styled as cards)
             html += this.renderSingleSelect(stepId, filteredSection);
@@ -151,41 +158,132 @@ class PromptGenerator {
         // Create a copy of the section to avoid modifying the original
         const filteredSection = { ...section };
 
-        if (!section.options) {
+        if (!section.options && !section.subsections) {
             return filteredSection;
         }
 
         // Get previous selections
         const writingType = this.selections[1]?.writing_type;
         const writerRole = this.selections[1]?.writer_role;
+        const writerVoice = this.selections[1]?.writer_voice;
 
-        // Define filtering rules
-        const filterRules = {
-            // Rule 1: Literature Review (Thematic) + International Graduate Student
-            lit_review_thematic_international: {
-                condition: () => writingType === 'lit_review_thematic' && writerRole === 'international_graduate',
-                hideOptions: ['first_person_appropriate', 'question_based', 'reflective_5r']
+        // Define comprehensive filtering rules based on writing type
+        const filteringRules = {
+            // REFLECTION ESSAY - Personal, introspective writing
+            'reflection': {
+                hideInSections: {
+                    'evidence_handling': ['hedge_appropriately', 'address_alternative_interpretations'],
+                    'rigor_requirements': ['show_methodological_awareness', 'identify_research_gaps', 'engage_counterarguments'],
+                    'special_elements': ['methodological_reflection', 'interdisciplinary_connections']
+                }
             },
-            // Rule 2: Reflection Essay
-            reflection: {
-                condition: () => writingType === 'reflection',
-                hideOptions: ['acknowledge_source_limits', 'identify_research_gaps', 'thematic_sections']
+            // METHODOLOGY SECTION - Detailed, objective methods description
+            'methodology': {
+                hideInSections: {
+                    'humanization_markers': ['contextual_informality', 'first_person_appropriate'],
+                    'special_elements': ['emphasize_gaps']
+                }
+            },
+            // RESULTS SECTION - Objective data presentation
+            'results': {
+                hideInSections: {
+                    'evidence_handling': ['address_alternative_interpretations'],
+                    'humanization_markers': ['first_person_appropriate', 'contextual_informality', 'meta_cognitive_markers'],
+                    'special_elements': ['historical_context', 'ethical_dimensions', 'practical_implications']
+                }
+            },
+            // DISCUSSION SECTION - Interpretation and implications
+            'discussion': {
+                hideInSections: {
+                    // Discussion needs most options, only hide a few
+                    'document_structure': ['reflective_5r']
+                }
+            },
+            // LITERATURE REVIEW (Both types) - Synthesis and analysis
+            'lit_review_thematic': {
+                hideInSections: {
+                    'humanization_markers': ['first_person_appropriate'],
+                    'document_structure': ['reflective_5r', 'question_based'],
+                    'special_elements': ['practical_implications']
+                }
+            },
+            'lit_review_chronological': {
+                hideInSections: {
+                    'humanization_markers': ['first_person_appropriate'],
+                    'document_structure': ['reflective_5r', 'question_based'],
+                    'special_elements': ['practical_implications']
+                }
+            },
+            // INTRODUCTION SECTION - Context and framing
+            'introduction': {
+                hideInSections: {
+                    'special_elements': ['methodological_reflection']
+                }
+            },
+            // ARGUMENTATIVE ESSAY - Position and evidence
+            'argumentative': {
+                hideInSections: {
+                    'document_structure': ['reflective_5r'],
+                    'special_elements': ['methodological_reflection']
+                }
+            },
+            // CRITICAL ANALYSIS - Evaluation and critique
+            'critical_analysis': {
+                hideInSections: {
+                    'document_structure': ['reflective_5r'],
+                    'special_elements': ['practical_implications']
+                }
+            },
+            // COMPARATIVE ANALYSIS - Systematic comparison
+            'comparative': {
+                hideInSections: {
+                    'document_structure': ['reflective_5r', 'question_based']
+                }
+            },
+            // CASE STUDY - In-depth examination
+            'case_study': {
+                hideInSections: {
+                    'document_structure': ['reflective_5r']
+                }
+            },
+            // RESEARCH PROPOSAL - Planning and justification
+            'research_proposal': {
+                hideInSections: {
+                    // Research proposal needs most options
+                    'document_structure': ['reflective_5r']
+                }
             }
         };
 
-        // Apply filtering rules
-        let optionsToHide = [];
-        Object.values(filterRules).forEach(rule => {
-            if (rule.condition()) {
-                optionsToHide.push(...rule.hideOptions);
-            }
-        });
+        // Get the filtering rules for the current writing type
+        const currentRules = writingType ? filteringRules[writingType] : null;
 
-        // Filter out hidden options
-        if (optionsToHide.length > 0) {
+        // Determine which options to hide based on writing type
+        let optionsToHide = [];
+        if (currentRules && currentRules.hideInSections && currentRules.hideInSections[section.id]) {
+            optionsToHide = currentRules.hideInSections[section.id];
+        }
+
+        // Apply filtering to options (for non-subsection sections)
+        if (section.options && optionsToHide.length > 0) {
             filteredSection.options = section.options.filter(option =>
                 !optionsToHide.includes(option.value)
             );
+        }
+
+        // Apply filtering to subsections (for grouped sections)
+        if (section.subsections) {
+            filteredSection.subsections = section.subsections.map(subsection => {
+                if (optionsToHide.length > 0) {
+                    return {
+                        ...subsection,
+                        options: subsection.options.filter(option =>
+                            !optionsToHide.includes(option.value)
+                        )
+                    };
+                }
+                return subsection;
+            }).filter(subsection => subsection.options.length > 0); // Remove empty subsections
         }
 
         return filteredSection;
@@ -302,6 +400,81 @@ class PromptGenerator {
         });
 
         html += `</div>`;
+        return html;
+    }
+
+    renderGroupedSingleSelect(stepId, section) {
+        const selectedValue = this.selections[stepId]?.[section.id];
+        let html = '';
+
+        section.subsections.forEach(subsection => {
+            html += `
+                <div class="subsection-container">
+                    <h4 class="subsection-title">${subsection.title}</h4>
+                    <div class="options-grid single-select">
+            `;
+
+            subsection.options.forEach(option => {
+                const isSelected = selectedValue === option.value;
+                html += `
+                    <div class="option-card ${isSelected ? 'selected' : ''}"
+                         data-step="${stepId}"
+                         data-section="${section.id}"
+                         data-value="${option.value}"
+                         data-type="single">
+                        <h4>${option.label}</h4>
+                        <p>${option.description}</p>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        return html;
+    }
+
+    renderGroupedMultiSelect(stepId, section) {
+        const selectedValues = this.selections[stepId]?.[section.id] || [];
+        let html = '';
+
+        section.subsections.forEach(subsection => {
+            html += `
+                <div class="subsection-container">
+                    <h4 class="subsection-title">${subsection.title}</h4>
+                    <div class="options-grid multi-select">
+            `;
+
+            subsection.options.forEach(option => {
+                const isSelected = selectedValues.includes(option.value);
+                html += `
+                    <div class="option-card checkbox-card ${isSelected ? 'selected' : ''}"
+                         data-step="${stepId}"
+                         data-section="${section.id}"
+                         data-value="${option.value}"
+                         data-type="multi">
+                        <div class="checkbox-indicator">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M5 10L8 13L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="option-content">
+                            <h4>${option.label}</h4>
+                            <p>${option.description}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
         return html;
     }
 

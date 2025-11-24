@@ -1067,6 +1067,27 @@ body {
     letter-spacing: 0.5px;
 }
 
+/* ===== SUBSECTION CONTAINERS ===== */
+.subsection-container {
+    margin-bottom: 32px;
+}
+
+.subsection-container:last-child {
+    margin-bottom: 0;
+}
+
+.subsection-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 3px solid var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+}
+
 /* ===== MULTI-SELECT CHECKBOX CARDS ===== */
 .checkbox-card {
     position: relative;
