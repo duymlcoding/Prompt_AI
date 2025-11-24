@@ -445,84 +445,48 @@ const promptSteps = [
                 type: "multi",
                 required: false,
                 componentTarget: "CORE_STYLE",
-                subsections: [
+                options: [
                     {
-                        id: "paragraph_structure",
-                        title: "PARAGRAPH STRUCTURE",
-                        options: [
-                            {
-                                value: "academic_paragraph_structure",
-                                label: "Academic Paragraph Construction",
-                                description: "Topic sentence, 3-5 supporting sentences, concluding/transition sentence",
-                                promptFragment: "Each paragraph must follow academic paragraph construction: (1) Begin with a clear topic sentence that states the main idea, (2) Develop with 3-5 supporting sentences containing evidence, examples, or analysis, (3) Include explanation sentences that connect evidence to your thesis, (4) End with a concluding or transition sentence that links to the next paragraph. Never write single-sentence paragraphs."
-                            },
-                            {
-                                value: "paragraph_unity_coherence",
-                                label: "Paragraph Unity and Coherence",
-                                description: "All sentences relate to topic sentence, use transitional phrases",
-                                promptFragment: "Every sentence within a paragraph must relate directly to the paragraph's topic sentence. If introducing a new main idea, start a new paragraph. Use transitional words and phrases (however, furthermore, for example, in contrast, as a result) to show logical relationships between sentences and between paragraphs."
-                            }
-                        ]
+                        value: "academic_paragraph_structure",
+                        label: "Academic Paragraph Construction",
+                        description: "Topic sentence, 3-5 supporting sentences, concluding/transition sentence",
+                        promptFragment: "Each paragraph must follow academic paragraph construction: (1) Begin with a clear topic sentence that states the main idea, (2) Develop with 3-5 supporting sentences containing evidence, examples, or analysis, (3) Include explanation sentences that connect evidence to your thesis, (4) End with a concluding or transition sentence that links to the next paragraph. Never write single-sentence paragraphs."
                     },
                     {
-                        id: "development_depth",
-                        title: "DEVELOPMENT AND DEPTH",
-                        options: [
-                            {
-                                value: "support_claims",
-                                label: "Support All Claims",
-                                description: "Never make unsupported claims, develop with evidence and analysis",
-                                promptFragment: "Never make claims without support. After stating a point, immediately develop it with specific details, evidence, or reasoning. Avoid surface-level description; instead, analyze what the information means, why it matters, and how it connects to your broader argument. Ask yourself 'So what?' after each point to ensure you explain significance."
-                            }
-                        ]
+                        value: "paragraph_unity_coherence",
+                        label: "Paragraph Unity and Coherence",
+                        description: "All sentences relate to topic sentence, use transitional phrases",
+                        promptFragment: "Every sentence within a paragraph must relate directly to the paragraph's topic sentence. If introducing a new main idea, start a new paragraph. Use transitional words and phrases (however, furthermore, for example, in contrast, as a result) to show logical relationships between sentences and between paragraphs."
                     },
                     {
-                        id: "sentence_style",
-                        title: "SENTENCE VARIETY AND CLARITY",
-                        options: [
-                            {
-                                value: "sentence_variety",
-                                label: "Varied Sentence Structure",
-                                description: "Mix simple, compound, and complex sentences naturally",
-                                promptFragment: "Mix sentence structures for readability - combine simple, compound, and complex sentences. Vary sentence length naturally, with most sentences between 15-25 words. Reduce comma usage; avoid long strings of clauses separated by commas. Break up overly long sentences (30+ words). Avoid em dashes. Front-load important information in sentences rather than burying it in dependent clauses."
-                            }
-                        ]
+                        value: "support_claims",
+                        label: "Support All Claims",
+                        description: "Never make unsupported claims, develop with evidence and analysis",
+                        promptFragment: "Never make claims without support. After stating a point, immediately develop it with specific details, evidence, or reasoning. Avoid surface-level description; instead, analyze what the information means, why it matters, and how it connects to your broader argument. Ask yourself 'So what?' after each point to ensure you explain significance."
                     },
                     {
-                        id: "word_choice",
-                        title: "WORD CHOICE AND PRECISION",
-                        options: [
-                            {
-                                value: "precise_vocabulary",
-                                label: "Precise, Specific Language",
-                                description: "Concrete nouns, active verbs, avoid repetition",
-                                promptFragment: "Choose specific, concrete nouns and active verbs over vague, abstract language. Avoid repetition of the same word within a paragraph - use pronouns or appropriate synonyms after the second use. Prefer precise academic vocabulary over casual expressions, but avoid unnecessarily complex jargon. No contractions."
-                            }
-                        ]
+                        value: "sentence_variety",
+                        label: "Varied Sentence Structure",
+                        description: "Mix simple, compound, and complex sentences naturally",
+                        promptFragment: "Mix sentence structures for readability - combine simple, compound, and complex sentences. Vary sentence length naturally, with most sentences between 15-25 words. Reduce comma usage; avoid long strings of clauses separated by commas. Break up overly long sentences (30+ words). Avoid em dashes. Front-load important information in sentences rather than burying it in dependent clauses."
                     },
                     {
-                        id: "human_markers",
-                        title: "HUMAN WRITING MARKERS",
-                        options: [
-                            {
-                                value: "natural_flow",
-                                label: "Natural, Progressive Development",
-                                description: "Avoid AI patterns, show reasoning process, vary paragraph length",
-                                promptFragment: "Reduce AI-like patterns by (1) avoiding comma splices and long comma-separated clauses, (2) breaking up sentences naturally, (3) varying paragraph length (3-7 sentences typically), (4) using concrete examples before abstract explanations, (5) showing your reasoning process rather than just stating conclusions. Let ideas develop progressively rather than appearing fully formed."
-                            }
-                        ]
+                        value: "precise_vocabulary",
+                        label: "Precise, Specific Language",
+                        description: "Concrete nouns, active verbs, avoid repetition",
+                        promptFragment: "Choose specific, concrete nouns and active verbs over vague, abstract language. Avoid repetition of the same word within a paragraph - use pronouns or appropriate synonyms after the second use. Prefer precise academic vocabulary over casual expressions, but avoid unnecessarily complex jargon. No contractions."
                     },
                     {
-                        id: "formatting_mechanics",
-                        title: "FORMATTING AND MECHANICS",
-                        options: [
-                            {
-                                value: "academic_formatting",
-                                label: "Standard Academic Formatting",
-                                description: "Proper mechanics, verb tense consistency, no unusual characters",
-                                promptFragment: "No contractions. Maintain correct subject-verb agreement. Write complete sentences. Do not use unusual characters like ** or ## for emphasis. Do not format lists as 'Heading:' with colons. Use standard academic formatting with proper paragraph breaks. Maintain consistent verb tense within sections (typically past tense for literature review and methodology, present tense for analysis and discussion)."
-                            }
-                        ]
+                        value: "natural_flow",
+                        label: "Natural, Progressive Development",
+                        description: "Avoid AI patterns, show reasoning process, vary paragraph length",
+                        promptFragment: "Reduce AI-like patterns by (1) avoiding comma splices and long comma-separated clauses, (2) breaking up sentences naturally, (3) varying paragraph length (3-7 sentences typically), (4) using concrete examples before abstract explanations, (5) showing your reasoning process rather than just stating conclusions. Let ideas develop progressively rather than appearing fully formed."
+                    },
+                    {
+                        value: "academic_formatting",
+                        label: "Standard Academic Formatting",
+                        description: "Proper mechanics, verb tense consistency, no unusual characters",
+                        promptFragment: "No contractions. Maintain correct subject-verb agreement. Write complete sentences. Do not use unusual characters like ** or ## for emphasis. Do not format lists as 'Heading:' with colons. Use standard academic formatting with proper paragraph breaks. Maintain consistent verb tense within sections (typically past tense for literature review and methodology, present tense for analysis and discussion)."
                     }
                 ]
             },
