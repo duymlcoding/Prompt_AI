@@ -49,6 +49,15 @@ class PromptGenerator {
             indicator.className = 'step-indicator';
             indicator.textContent = `${index + 1}. ${step.title}`;
             indicator.dataset.step = index + 1;
+            indicator.style.cursor = 'pointer';
+
+            // Add click handler for navigation
+            indicator.addEventListener('click', () => {
+                if (this.currentStep > 0) {  // Only allow navigation after starting
+                    this.navigateToStep(index + 1);
+                }
+            });
+
             container.appendChild(indicator);
         });
     }
@@ -80,6 +89,13 @@ class PromptGenerator {
             this.selections[step.id] = {};
         }
 
+        // Auto-initialize range sliders with default values
+        step.sections.forEach(section => {
+            if (section.type === 'range' && this.selections[step.id][section.id] === undefined) {
+                this.selections[step.id][section.id] = section.default || section.min;
+            }
+        });
+
         let html = `
             <div class="step-content">
                 <h2>Step ${step.id}: ${step.title}</h2>
@@ -110,25 +126,74 @@ class PromptGenerator {
                 </div>
         `;
 
+        // Filter options based on previous selections
+        const filteredSection = this.filterSectionOptions(section);
+
         if (section.type === 'fixed') {
             // Fixed sections - display as informational, always applied
             html += this.renderFixedSection(section);
+        } else if (section.type === 'range') {
+            // Range slider
+            html += this.renderRangeSlider(stepId, section);
         } else if (section.type === 'multi') {
             // Multi-select - checkboxes
-            html += this.renderMultiSelect(stepId, section);
+            html += this.renderMultiSelect(stepId, filteredSection);
         } else {
             // Single-select - radio buttons (styled as cards)
-            html += this.renderSingleSelect(stepId, section);
+            html += this.renderSingleSelect(stepId, filteredSection);
         }
 
         html += `</div>`;
         return html;
     }
 
+    filterSectionOptions(section) {
+        // Create a copy of the section to avoid modifying the original
+        const filteredSection = { ...section };
+
+        if (!section.options) {
+            return filteredSection;
+        }
+
+        // Get previous selections
+        const writingType = this.selections[1]?.writing_type;
+        const writerRole = this.selections[1]?.writer_role;
+
+        // Define filtering rules
+        const filterRules = {
+            // Rule 1: Literature Review (Thematic) + International Graduate Student
+            lit_review_thematic_international: {
+                condition: () => writingType === 'lit_review_thematic' && writerRole === 'international_graduate',
+                hideOptions: ['first_person_appropriate', 'question_based', 'reflective_5r']
+            },
+            // Rule 2: Reflection Essay
+            reflection: {
+                condition: () => writingType === 'reflection',
+                hideOptions: ['acknowledge_source_limits', 'identify_research_gaps', 'thematic_sections']
+            }
+        };
+
+        // Apply filtering rules
+        let optionsToHide = [];
+        Object.values(filterRules).forEach(rule => {
+            if (rule.condition()) {
+                optionsToHide.push(...rule.hideOptions);
+            }
+        });
+
+        // Filter out hidden options
+        if (optionsToHide.length > 0) {
+            filteredSection.options = section.options.filter(option =>
+                !optionsToHide.includes(option.value)
+            );
+        }
+
+        return filteredSection;
+    }
+
     renderFixedSection(section) {
         let html = `
             <div class="fixed-section">
-                <p class="fixed-section-notice">✓ These requirements are always applied</p>
         `;
 
         if (section.rules) {
@@ -156,6 +221,34 @@ class PromptGenerator {
         }
 
         html += `</div>`;
+        return html;
+    }
+
+    renderRangeSlider(stepId, section) {
+        const currentValue = this.selections[stepId]?.[section.id] || section.default || section.min;
+
+        let html = `
+            <div class="range-slider-container">
+                <div class="range-value-display">
+                    <span class="range-current-value" id="range-${stepId}-${section.id}">${currentValue}</span>
+                    <span class="range-label">words</span>
+                </div>
+                <input type="range"
+                       class="range-slider"
+                       id="slider-${stepId}-${section.id}"
+                       data-step="${stepId}"
+                       data-section="${section.id}"
+                       min="${section.min}"
+                       max="${section.max}"
+                       step="${section.step}"
+                       value="${currentValue}">
+                <div class="range-labels">
+                    <span>${section.min}</span>
+                    <span>${section.max}</span>
+                </div>
+            </div>
+        `;
+
         return html;
     }
 
@@ -213,6 +306,7 @@ class PromptGenerator {
     }
 
     attachOptionListeners() {
+        // Handle option cards
         const cards = document.querySelectorAll('.option-card');
         cards.forEach(card => {
             card.addEventListener('click', () => {
@@ -262,6 +356,38 @@ class PromptGenerator {
                 }, 10);
             });
         });
+
+        // Handle range sliders
+        const sliders = document.querySelectorAll('.range-slider');
+        sliders.forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const stepId = parseInt(slider.dataset.step);
+                const sectionId = slider.dataset.section;
+                const value = parseInt(slider.value);
+
+                // Update display
+                const display = document.getElementById(`range-${stepId}-${sectionId}`);
+                if (display) {
+                    display.textContent = value;
+                }
+
+                // Store selection
+                this.selections[stepId][sectionId] = value;
+
+                // Update UI
+                this.updateHeaderStats();
+                this.updateButtons();
+            });
+        });
+    }
+
+    navigateToStep(stepNumber) {
+        if (stepNumber >= 1 && stepNumber <= this.totalSteps) {
+            this.currentStep = stepNumber;
+            this.renderStep();
+            this.updateProgress();
+            this.updateButtons();
+        }
     }
 
     nextStep() {
@@ -323,6 +449,11 @@ class PromptGenerator {
         for (const section of stepConfig.sections) {
             if (section.required) {
                 const value = stepSelections[section.id];
+
+                // For range, must have a value
+                if (section.type === 'range' && (value === undefined || value === null)) {
+                    return false;
+                }
 
                 // For single-select, must have a value
                 if (section.type === 'single' && !value) {

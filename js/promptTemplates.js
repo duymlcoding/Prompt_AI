@@ -30,6 +30,9 @@ const promptTemplates = {
         if (section.type === 'fixed') {
             // Fixed sections - combine rules and banned phrases
             return this.getFixedSectionContent(section);
+        } else if (section.type === 'range') {
+            // Range slider - replace {VALUE} placeholder with actual value
+            return this.getRangeContent(section, selectionValue);
         } else if (section.type === 'multi') {
             // Multi-select - combine multiple selected options
             return this.getMultiSelectContent(section, selectionValue);
@@ -37,6 +40,15 @@ const promptTemplates = {
             // Single-select - find the selected option
             return this.getSingleSelectContent(section, selectionValue);
         }
+    },
+
+    getRangeContent: function(section, selectedValue) {
+        if (selectedValue === undefined || selectedValue === null) {
+            return '';
+        }
+
+        // Replace {VALUE} placeholder with actual value
+        return section.promptFragment.replace(/{VALUE}/g, selectedValue);
     },
 
     getFixedSectionContent: function(section) {
@@ -102,6 +114,7 @@ const promptTemplates = {
 
     groupSections: function(promptParts) {
         const grouped = {
+            'WORD COUNT REQUIREMENT': '',
             'ROLE': '',
             'WRITING TYPE': '',
             'INPUTS YOU WILL RECEIVE': '',
@@ -116,7 +129,9 @@ const promptTemplates = {
 
         promptParts.forEach(part => {
             // Map section titles to grouped categories
-            if (part.title.includes('ROLE') || part.title.includes('WRITER')) {
+            if (part.title.includes('WORD_COUNT') || part.title.includes('WORD COUNT')) {
+                grouped['WORD COUNT REQUIREMENT'] += (grouped['WORD COUNT REQUIREMENT'] ? '\n\n' : '') + part.content;
+            } else if (part.title.includes('ROLE') || part.title.includes('WRITER')) {
                 grouped['ROLE'] += (grouped['ROLE'] ? '\n\n' : '') + part.content;
             } else if (part.title.includes('WRITING TYPE') || part.title.includes('WRITING_TYPE')) {
                 grouped['WRITING TYPE'] += (grouped['WRITING TYPE'] ? '\n\n' : '') + part.content;
