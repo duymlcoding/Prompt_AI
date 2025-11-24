@@ -8,6 +8,18 @@ const promptSteps = [
         description: "Define what you're writing and who you're writing as",
         sections: [
             {
+                id: "word_count_target",
+                title: "Target Word Count",
+                type: "range",
+                required: true,
+                componentTarget: "WORD_COUNT",
+                min: 100,
+                max: 2000,
+                step: 100,
+                default: 800,
+                promptFragment: "STRICT WORD COUNT REQUIREMENT: The writing MUST contain exactly {VALUE} words (±5 words tolerance). Count every word carefully. If you reach the word limit mid-sentence, complete that sentence naturally, but do not exceed {VALUE} + 5 words total. This is a firm requirement that must be followed precisely."
+            },
+            {
                 id: "writing_type",
                 title: "Writing Type",
                 type: "single", // single-select
@@ -383,16 +395,13 @@ const promptSteps = [
                 required: true,
                 componentTarget: "CORE_STYLE",
                 rules: [
-                    "No contractions. Maintain correct subject-verb agreement. Write complete sentences.",
-                    "Prioritize specificity and focus over generic filler. Avoid vague language.",
-                    "Each paragraph has a purpose: starts with a topic sentence, develops with reasoning and evidence, and ends by linking forward to the next idea.",
-                    "Use transitional phrases so all paragraphs connect and the whole piece reads as a continuous argument.",
-                    "Elaborate on each point with analysis, concepts, and where available, evidence or data. Move beyond mere description to interpretation and significance.",
-                    "Reduce commas; avoid long strings of clauses; break up long sentences; avoid em dashes.",
-                    "Avoid strong word repetition within paragraphs. If a key term appears more than twice, use pronouns or appropriate synonyms.",
-                    "Do not use unusual characters like ** or ##. Do not format lists as 'Heading:' with colons.",
-                    "Let your thoughts move with subtle spontaneity and natural flow. Vary sentence complexity to create perplexity and burstiness, alternating between short and long constructions.",
-                    "Keep the style balanced between professionalism and human warmth."
+                    "PARAGRAPH STRUCTURE: Each paragraph must follow academic paragraph construction: (1) Begin with a clear topic sentence that states the main idea, (2) Develop with 3-5 supporting sentences containing evidence, examples, or analysis, (3) Include explanation sentences that connect evidence to your thesis, (4) End with a concluding or transition sentence that links to the next paragraph. Never write single-sentence paragraphs.",
+                    "PARAGRAPH UNITY AND COHERENCE: Every sentence within a paragraph must relate directly to the paragraph's topic sentence. If introducing a new main idea, start a new paragraph. Use transitional words and phrases (however, furthermore, for example, in contrast, as a result) to show logical relationships between sentences and between paragraphs.",
+                    "DEVELOPMENT AND DEPTH: Never make claims without support. After stating a point, immediately develop it with specific details, evidence, or reasoning. Avoid surface-level description; instead, analyze what the information means, why it matters, and how it connects to your broader argument. Ask yourself 'So what?' after each point to ensure you explain significance.",
+                    "SENTENCE VARIETY AND CLARITY: Mix sentence structures for readability - combine simple, compound, and complex sentences. Vary sentence length naturally, with most sentences between 15-25 words. Reduce comma usage; avoid long strings of clauses separated by commas. Break up overly long sentences (30+ words). Avoid em dashes. Front-load important information in sentences rather than burying it in dependent clauses.",
+                    "WORD CHOICE AND PRECISION: Choose specific, concrete nouns and active verbs over vague, abstract language. Avoid repetition of the same word within a paragraph - use pronouns or appropriate synonyms after the second use. Prefer precise academic vocabulary over casual expressions, but avoid unnecessarily complex jargon. No contractions.",
+                    "HUMAN WRITING MARKERS: Reduce AI-like patterns by (1) avoiding comma splices and long comma-separated clauses, (2) breaking up sentences naturally, (3) varying paragraph length (3-7 sentences typically), (4) using concrete examples before abstract explanations, (5) showing your reasoning process rather than just stating conclusions. Let ideas develop progressively rather than appearing fully formed.",
+                    "FORMATTING AND MECHANICS: No contractions. Maintain correct subject-verb agreement. Write complete sentences. Do not use unusual characters like ** or ## for emphasis. Do not format lists as 'Heading:' with colons. Use standard academic formatting with proper paragraph breaks. Maintain consistent verb tense within sections (typically past tense for literature review and methodology, present tense for analysis and discussion)."
                 ]
             },
             {
