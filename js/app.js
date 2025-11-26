@@ -14,6 +14,7 @@ class PromptGenerator {
         this.updateHeaderStats();
         this.initTheme();
         this.initSaveLoad();
+        this.renderWelcomePresets();
     }
 
     attachInitialListeners() {
@@ -144,6 +145,11 @@ class PromptGenerator {
                 html += this.renderGroupedMultiSelect(stepId, filteredSection);
             } else {
                 html += this.renderMultiSelect(stepId, filteredSection);
+
+                // Add stealth dashboard for humanization section
+                if (section.id === 'humanization_markers') {
+                    html += this.renderStealthDashboard(stepId);
+                }
             }
         } else {
             // Single-select - radio buttons (styled as cards)
@@ -324,6 +330,8 @@ class PromptGenerator {
 
     renderRangeSlider(stepId, section) {
         const currentValue = this.selections[stepId]?.[section.id] || section.default || section.min;
+        const showBudgetBar = section.showBudgetBar;
+        const writingScope = this.selections[stepId]?.writing_scope;
 
         let html = `
             <div class="range-slider-container">
@@ -344,10 +352,217 @@ class PromptGenerator {
                     <span>${section.min}</span>
                     <span>${section.max}</span>
                 </div>
+                ${showBudgetBar && writingScope ? this.renderBudgetBar(stepId, currentValue, writingScope) : ''}
             </div>
         `;
 
         return html;
+    }
+
+    renderBudgetBar(stepId, totalWords, scopeValue) {
+        // Find the writing scope option
+        const scopeSection = promptSteps[stepId - 1].sections.find(s => s.id === 'writing_scope');
+        if (!scopeSection) return '';
+
+        const scopeOption = scopeSection.options.find(o => o.value === scopeValue);
+        if (!scopeOption || !scopeOption.budget) return '';
+
+        const budget = scopeOption.budget;
+        const sections = Object.keys(budget);
+
+        let html = `
+            <div class="budget-bar-container">
+                <h5 class="budget-bar-title">📊 Word Budget Breakdown</h5>
+                <div class="budget-bar">
+        `;
+
+        sections.forEach(sectionName => {
+            const percentage = budget[sectionName];
+            const words = Math.round((totalWords * percentage) / 100);
+
+            html += `
+                <div class="budget-segment" style="width: ${percentage}%" title="${sectionName}: ${words} words">
+                    <span class="budget-label">${this.capitalize(sectionName)}</span>
+                    <span class="budget-words">${words}w</span>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div class="budget-legend">
+        `;
+
+        sections.forEach(sectionName => {
+            const percentage = budget[sectionName];
+            const words = Math.round((totalWords * percentage) / 100);
+
+            html += `
+                <div class="budget-legend-item">
+                    <span class="budget-dot"></span>
+                    <span class="budget-legend-text">${this.capitalize(sectionName)}: ${words} words (${percentage}%)</span>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    renderStealthDashboard(stepId) {
+        const humanizationSelections = this.selections[stepId]?.humanization_markers || [];
+        const coreStyleSelections = this.selections[stepId]?.core_style_rules || [];
+
+        // Calculate stealth score
+        const stealthScore = this.calculateStealthScore(humanizationSelections, coreStyleSelections);
+        const riskLevel = this.getRiskLevel(stealthScore);
+
+        let html = `
+            <div class="stealth-dashboard" id="stealthDashboard">
+                <div class="stealth-header">
+                    <h4>🛡️ AI Detection Stealth Analysis</h4>
+                    <p class="stealth-subtitle">Real-time assessment of human-like writing patterns</p>
+                </div>
+
+                <div class="stealth-meter-container">
+                    <div class="stealth-meter">
+                        <div class="stealth-meter-fill ${riskLevel.class}" style="width: ${stealthScore}%">
+                            <span class="stealth-score">${stealthScore}%</span>
+                        </div>
+                    </div>
+                    <div class="stealth-labels">
+                        <span>High Risk</span>
+                        <span>Moderate</span>
+                        <span>Low Risk</span>
+                    </div>
+                </div>
+
+                <div class="stealth-status ${riskLevel.class}">
+                    <div class="stealth-icon">${riskLevel.icon}</div>
+                    <div class="stealth-status-content">
+                        <h5>${riskLevel.title}</h5>
+                        <p>${riskLevel.message}</p>
+                    </div>
+                </div>
+
+                <div class="stealth-features">
+                    <h5>Active Humanization Features (${humanizationSelections.length}/8)</h5>
+                    <div class="stealth-feature-grid">
+                        ${this.renderStealthFeatures(humanizationSelections)}
+                    </div>
+                </div>
+
+                ${humanizationSelections.length < 3 ? `
+                    <div class="stealth-recommendation">
+                        <strong>💡 Tip:</strong> Select at least 3-4 humanization features for optimal stealth. Consider adding: ${this.getSuggestedFeatures(humanizationSelections).join(', ')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        return html;
+    }
+
+    calculateStealthScore(humanizationSelections, coreStyleSelections) {
+        let score = 30; // Base score
+
+        // Each humanization feature adds stealth
+        const featureWeights = {
+            'esl_patterns': 15,
+            'rhythm_variation': 12,
+            'subtle_imperfections': 18,
+            'meta_cognitive_markers': 10,
+            'contextual_informality': 8,
+            'first_person_appropriate': 7,
+            'honest_hedging': 10,
+            'conversational_transitions': 10
+        };
+
+        humanizationSelections.forEach(feature => {
+            score += featureWeights[feature] || 5;
+        });
+
+        // Core style rules also contribute
+        score += coreStyleSelections.length * 2;
+
+        // Cap at 95%
+        return Math.min(95, score);
+    }
+
+    getRiskLevel(score) {
+        if (score >= 70) {
+            return {
+                class: 'risk-low',
+                icon: '✅',
+                title: 'Low Detection Risk',
+                message: 'Your writing will appear highly human-like. Excellent humanization configuration!'
+            };
+        } else if (score >= 50) {
+            return {
+                class: 'risk-moderate',
+                icon: '⚠️',
+                title: 'Moderate Detection Risk',
+                message: 'Good humanization, but consider adding more features for better stealth.'
+            };
+        } else {
+            return {
+                class: 'risk-high',
+                icon: '🚨',
+                title: 'High Detection Risk',
+                message: 'Limited humanization. Add more features to reduce AI detection probability.'
+            };
+        }
+    }
+
+    renderStealthFeatures(selectedFeatures) {
+        const featureLabels = {
+            'esl_patterns': { label: 'ESL Patterns', impact: 'High' },
+            'rhythm_variation': { label: 'Rhythm Variation', impact: 'High' },
+            'subtle_imperfections': { label: 'Natural Imperfections', impact: 'Very High' },
+            'meta_cognitive_markers': { label: 'Thinking Markers', impact: 'Medium' },
+            'contextual_informality': { label: 'Informal Touch', impact: 'Medium' },
+            'first_person_appropriate': { label: 'First Person', impact: 'Medium' },
+            'honest_hedging': { label: 'Hedging Language', impact: 'Medium' },
+            'conversational_transitions': { label: 'Natural Transitions', impact: 'Medium' }
+        };
+
+        if (selectedFeatures.length === 0) {
+            return '<p class="no-features">No humanization features selected yet</p>';
+        }
+
+        return selectedFeatures.map(feature => {
+            const info = featureLabels[feature] || { label: feature, impact: 'Low' };
+            return `
+                <div class="stealth-feature-badge">
+                    <span class="feature-name">${info.label}</span>
+                    <span class="feature-impact impact-${info.impact.toLowerCase().replace(' ', '-')}">${info.impact}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    getSuggestedFeatures(currentSelections) {
+        const allFeatures = [
+            'Rhythm Variation',
+            'Subtle Imperfections',
+            'Meta-Cognitive Markers',
+            'ESL Patterns'
+        ];
+
+        const suggestions = allFeatures.filter((f, i) => {
+            const values = ['rhythm_variation', 'subtle_imperfections', 'meta_cognitive_markers', 'esl_patterns'];
+            return !currentSelections.includes(values[i]);
+        });
+
+        return suggestions.slice(0, 2);
     }
 
     renderMultiSelect(stepId, section) {
@@ -357,19 +572,37 @@ class PromptGenerator {
 
         section.options.forEach(option => {
             const isSelected = selectedValues.includes(option.value);
+            const hasTooltip = option.helpText;
+            const hasIcon = option.icon;
+            const hasBestFor = option.bestFor;
+            const isAdvanced = option.advanced;
+
             html += `
-                <div class="option-card checkbox-card ${isSelected ? 'selected' : ''}"
+                <div class="option-card checkbox-card ${isSelected ? 'selected' : ''} ${isAdvanced ? 'advanced-option' : ''}"
                      data-step="${stepId}"
                      data-section="${section.id}"
                      data-value="${option.value}"
-                     data-type="multi">
+                     data-type="multi"
+                     data-advanced="${isAdvanced || false}">
                     <div class="checkbox-indicator">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M5 10L8 13L15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
+                    ${hasIcon ? `<div class="option-icon-multi">${option.icon}</div>` : ''}
                     <div class="option-content">
-                        <h4>${option.label}</h4>
+                        <div class="option-header">
+                            <h4>${option.label}${isAdvanced ? ' <span class="advanced-badge">Advanced</span>' : ''}</h4>
+                            ${hasTooltip ? `
+                                <button class="help-icon" data-tooltip="${this.escapeHtml(option.helpText)}" type="button">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M8 11.5V11M8 5C7.17157 5 6.5 5.67157 6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${hasBestFor ? `<div class="best-for-tag">Best for: ${option.bestFor}</div>` : ''}
                         <p>${option.description}</p>
                     </div>
                 </div>
@@ -387,13 +620,29 @@ class PromptGenerator {
 
         section.options.forEach(option => {
             const isSelected = selectedValue === option.value;
+            const hasTooltip = option.helpText;
+            const hasIcon = option.icon;
+            const hasBestFor = option.bestFor;
+
             html += `
                 <div class="option-card ${isSelected ? 'selected' : ''}"
                      data-step="${stepId}"
                      data-section="${section.id}"
                      data-value="${option.value}"
                      data-type="single">
-                    <h4>${option.label}</h4>
+                    ${hasIcon ? `<div class="option-icon">${option.icon}</div>` : ''}
+                    <div class="option-header">
+                        <h4>${option.label}</h4>
+                        ${hasTooltip ? `
+                            <button class="help-icon" data-tooltip="${this.escapeHtml(option.helpText)}" type="button">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M8 11.5V11M8 5C7.17157 5 6.5 5.67157 6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                    ${hasBestFor ? `<div class="best-for-tag">Best for: ${option.bestFor}</div>` : ''}
                     <p>${option.description}</p>
                 </div>
             `;
@@ -416,13 +665,29 @@ class PromptGenerator {
 
             subsection.options.forEach(option => {
                 const isSelected = selectedValue === option.value;
+                const hasTooltip = option.helpText;
+                const hasIcon = option.icon;
+                const hasBestFor = option.bestFor;
+
                 html += `
                     <div class="option-card ${isSelected ? 'selected' : ''}"
                          data-step="${stepId}"
                          data-section="${section.id}"
                          data-value="${option.value}"
                          data-type="single">
-                        <h4>${option.label}</h4>
+                        ${hasIcon ? `<div class="option-icon">${option.icon}</div>` : ''}
+                        <div class="option-header">
+                            <h4>${option.label}</h4>
+                            ${hasTooltip ? `
+                                <button class="help-icon" data-tooltip="${this.escapeHtml(option.helpText)}" type="button">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M8 11.5V11M8 5C7.17157 5 6.5 5.67157 6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${hasBestFor ? `<div class="best-for-tag">Best for: ${option.bestFor}</div>` : ''}
                         <p>${option.description}</p>
                     </div>
                 `;
@@ -482,7 +747,12 @@ class PromptGenerator {
         // Handle option cards
         const cards = document.querySelectorAll('.option-card');
         cards.forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                // Don't toggle if clicking on help icon
+                if (e.target.closest('.help-icon')) {
+                    return;
+                }
+
                 const stepId = parseInt(card.dataset.step);
                 const sectionId = card.dataset.section;
                 const value = card.dataset.value;
@@ -530,6 +800,9 @@ class PromptGenerator {
             });
         });
 
+        // Handle help icon tooltips
+        this.attachTooltipListeners();
+
         // Handle range sliders
         const sliders = document.querySelectorAll('.range-slider');
         sliders.forEach(slider => {
@@ -552,6 +825,51 @@ class PromptGenerator {
                 this.updateButtons();
             });
         });
+    }
+
+    attachTooltipListeners() {
+        const helpIcons = document.querySelectorAll('.help-icon');
+        helpIcons.forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showTooltip(icon);
+            });
+        });
+    }
+
+    showTooltip(iconElement) {
+        // Remove any existing tooltips
+        document.querySelectorAll('.tooltip').forEach(t => t.remove());
+
+        const tooltipText = iconElement.dataset.tooltip;
+        if (!tooltipText) return;
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = tooltipText;
+        document.body.appendChild(tooltip);
+
+        // Position the tooltip
+        const iconRect = iconElement.getBoundingClientRect();
+        tooltip.style.left = `${iconRect.left + iconRect.width / 2}px`;
+        tooltip.style.top = `${iconRect.top - 10}px`;
+
+        // Add click outside listener to close
+        setTimeout(() => {
+            const closeTooltip = (e) => {
+                if (!tooltip.contains(e.target) && !iconElement.contains(e.target)) {
+                    tooltip.remove();
+                    document.removeEventListener('click', closeTooltip);
+                }
+            };
+            document.addEventListener('click', closeTooltip);
+        }, 100);
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     navigateToStep(stepNumber) {
@@ -1276,6 +1594,30 @@ class PromptGenerator {
         const modal = document.getElementById('saveLoadModal');
         modal.style.display = 'none';
         modal.innerHTML = '';
+    }
+
+    renderWelcomePresets() {
+        const presetsContainer = document.getElementById('welcomePresets');
+        if (!presetsContainer) return;
+
+        const presets = this.getPresets();
+
+        presetsContainer.innerHTML = presets.map((preset, index) => `
+            <div class="preset-welcome-card" data-preset-index="${index}">
+                <div class="preset-welcome-icon">${preset.icon}</div>
+                <h4>${preset.name}</h4>
+                <p>${preset.description}</p>
+                <button class="btn btn-secondary btn-small">Use Template</button>
+            </div>
+        `).join('');
+
+        // Attach listeners
+        document.querySelectorAll('.preset-welcome-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const index = parseInt(card.dataset.presetIndex);
+                this.loadPreset(index);
+            });
+        });
     }
 }
 

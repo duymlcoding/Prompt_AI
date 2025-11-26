@@ -8,6 +8,49 @@ const promptSteps = [
         description: "Define what you're writing and who you're writing as",
         sections: [
             {
+                id: "writing_scope",
+                title: "What are you writing?",
+                type: "single",
+                required: true,
+                componentTarget: "WRITING_SCOPE",
+                options: [
+                    {
+                        value: "full_paper",
+                        label: "Full Academic Paper",
+                        description: "Complete paper with all sections",
+                        icon: "📄",
+                        budget: {
+                            introduction: 15,
+                            literature: 25,
+                            methodology: 20,
+                            results: 20,
+                            discussion: 15,
+                            conclusion: 5
+                        }
+                    },
+                    {
+                        value: "single_section",
+                        label: "Single Section Only",
+                        description: "Just one focused section",
+                        icon: "📝",
+                        budget: {
+                            content: 100
+                        }
+                    },
+                    {
+                        value: "essay",
+                        label: "Essay/Short Paper",
+                        description: "Introduction, body, conclusion",
+                        icon: "✍️",
+                        budget: {
+                            introduction: 15,
+                            body: 70,
+                            conclusion: 15
+                        }
+                    }
+                ]
+            },
+            {
                 id: "word_count_target",
                 title: "Target Word Count",
                 type: "range",
@@ -17,6 +60,7 @@ const promptSteps = [
                 max: 1500,
                 step: 50,
                 default: 600,
+                showBudgetBar: true,
                 promptFragment: "STRICT WORD COUNT REQUIREMENT: The writing MUST contain exactly {VALUE} words (±50 words tolerance). Count every word carefully. If you reach the word limit mid-sentence, complete that sentence naturally, but do not exceed {VALUE} + 50 words total. This is a firm requirement that must be followed precisely."
             },
             {
@@ -34,18 +78,27 @@ const promptSteps = [
                                 value: "research_proposal",
                                 label: "Research Proposal",
                                 description: "Propose new research with methodology and significance",
+                                helpText: "A research proposal pitches a new study to reviewers. It should convince them your research question is important, your methods are sound, and your project is feasible. Best for: grant applications, thesis proposals.",
+                                bestFor: "Grant applications, thesis proposals",
+                                icon: "📋",
                                 promptFragment: "This is a research proposal that outlines a planned study, demonstrates its significance, presents methodology, and addresses feasibility. The writing should establish the research problem and its importance, review relevant literature to show knowledge gaps, present clear research questions or hypotheses, detail proposed methodology with justification, discuss expected contributions, and address practical considerations. Convince readers the research is worthwhile, feasible, and methodologically sound."
                             },
                             {
                                 value: "methodology",
                                 label: "Methodology Section",
                                 description: "Detailed research methods and procedures explanation",
+                                helpText: "The methodology section explains HOW you conducted your research in enough detail that others could replicate it. Include your research design, data collection methods, and analytical approach. Best for: empirical research papers.",
+                                bestFor: "Empirical research papers",
+                                icon: "🔬",
                                 promptFragment: "This is a methodology section that comprehensively describes research design, data collection procedures, analytical methods, and justifications for methodological choices. The writing should provide sufficient detail for replication, explain why specific methods were chosen, address limitations and validity concerns, and demonstrate rigorous attention to research ethics and methodological appropriateness for answering the research questions."
                             },
                             {
                                 value: "results",
                                 label: "Results Section",
                                 description: "Present empirical findings with data analysis",
+                                helpText: "The results section presents what you found WITHOUT interpreting what it means (save that for the discussion). Just the facts: data, statistics, tables, and objective observations. Best for: experimental or quantitative studies.",
+                                bestFor: "Experimental/quantitative studies",
+                                icon: "📊",
                                 promptFragment: "This is a results section that presents empirical findings systematically and objectively. The writing should organize results logically (often by research question or hypothesis), present data clearly with appropriate statistical analysis, use tables and figures to support textual description, and report findings without interpretation or discussion. Maintain objectivity while ensuring accessibility and clarity in presenting complex data."
                             }
                         ]
@@ -135,6 +188,9 @@ const promptSteps = [
                         value: "phd_researcher",
                         label: "PhD Researcher",
                         description: "Advanced scholar with deep expertise and independent analysis",
+                        helpText: "Write as a doctoral-level expert with deep knowledge of your field. Your writing shows theoretical sophistication, methodological precision, and critical engagement with scholarly debates.",
+                        bestFor: "Dissertations, journal articles",
+                        icon: "🎓",
                         promptFragment: "You are a PhD-level researcher with substantial expertise in your field. Your writing demonstrates sophisticated command of theoretical frameworks, methodological precision, and critical engagement with scholarly debates. You write with intellectual confidence while remaining appropriately cautious about claims. You balance authoritative knowledge with scholarly humility, acknowledging complexity and uncertainty where it exists. Your prose is precise and nuanced, demonstrating facility with discipline-specific discourse while remaining accessible to fellow scholars. You naturally integrate multiple theoretical perspectives and show awareness of methodological trade-offs."
                     },
                     {
@@ -147,6 +203,9 @@ const promptSteps = [
                         value: "international_graduate",
                         label: "International Graduate Student",
                         description: "Proficient multilingual scholar with careful academic approach",
+                        helpText: "Write as an English-as-additional-language scholar. Your writing is academically strong with subtle patterns common among multilingual writers: slightly formal phrasing, careful word order, and explicit logical connectors.",
+                        bestFor: "ESL/multilingual students",
+                        icon: "🌍",
                         promptFragment: "You are an international graduate student writing in English as an additional language. Your writing demonstrates strong academic competence with subtle linguistic patterns common among proficient multilingual scholars. You express complex ideas clearly while occasionally using slightly formal constructions or explicit logical markers ('Therefore,' 'As a result,' 'It can be observed that') that signal careful, deliberate composition. Your prose shows attention to precision and correctness, sometimes favoring clarity over idiomatic brevity. You write complete, grammatically sound sentences with thoughtful structure."
                     },
                     {
@@ -501,6 +560,10 @@ const promptSteps = [
                         value: "esl_patterns",
                         label: "ESL-Friendly Patterns",
                         description: "Careful phrasing typical of proficient multilingual writers",
+                        helpText: "Adds subtle patterns common in proficient multilingual writing: slightly formal phrasing ('It is possible to observe that'), explicit connectors ('Therefore,' 'Thus'), and careful sentence construction. Makes writing feel more human for non-native speakers.",
+                        bestFor: "International students, ESL contexts",
+                        icon: "🗣️",
+                        advanced: false,
                         promptFragment: "Include subtle linguistic patterns common among proficient non-native English speakers: careful word order, slightly formal constructions ('It is possible to observe that,' 'This can be seen in'), explicit logical connectors ('Therefore,' 'Thus,' 'As a result,' 'In this way'), and preference for clear structure over idiomatic brevity. Write with precision and correctness, occasionally favoring clarity over the most natural-sounding English phrasing. These patterns should feel natural, not exaggerated."
                     },
                     {
@@ -513,6 +576,10 @@ const promptSteps = [
                         value: "subtle_imperfections",
                         label: "Subtle Natural Imperfections",
                         description: "Minor quirks that signal human authorship",
+                        helpText: "Introduces 1-2 tiny, harmless quirks per 500 words (like a missing optional comma or slightly awkward phrasing) that make writing feel human. Never breaks meaning or clarity - just adds subtle authenticity.",
+                        bestFor: "AI detection avoidance",
+                        icon: "✨",
+                        advanced: true,
                         promptFragment: "Allow very subtle, natural imperfections that appear in careful human writing: an optional comma occasionally missing, slightly awkward but grammatically correct phrasing, minor redundancy that slipped past revision, rhythm irregularities. Aim for 1-2 tiny, harmless quirks per 500 words. Never break meaning, compromise clarity, or introduce errors in key terminology. These imperfections should be nearly imperceptible but collectively signal human composition."
                     },
                     {
